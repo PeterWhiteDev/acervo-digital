@@ -48,8 +48,9 @@ Define un atributo aplicable a los elementos de un tipo.
 - `itemTypeId`: tipo al que pertenece
 - `name`: nombre visible
 - `key`: identificador estable para las API
-- `valueType`: `TEXT`, `NUMBER`, `DECIMAL`, `DATE` o `BOOLEAN`
+- `valueType`: `TEXT`, `INTEGER`, `DECIMAL`, `DATE` o `BOOLEAN`
 - `required`: indica si el atributo debe tener valor
+- `displayOrder`: posición del atributo en la presentación
 
 Los valores permitidos para cada tipo se validarán en el servicio. La edición o eliminación de definiciones que ya tengan valores asociados deberá proteger la integridad de los elementos existentes.
 
@@ -95,19 +96,20 @@ Debe existir como máximo un valor por pareja elemento-definición. Los valores 
 
 - `POST /api/v1/item-types`: crear un tipo.
 - `GET /api/v1/item-types`: listar tipos activos.
-- `GET /api/v1/item-types/{id}`: consultar un tipo con sus definiciones.
+- `GET /api/v1/item-types/{id}`: consultar un tipo.
 - `POST /api/v1/item-types/{id}/attributes`: añadir una definición.
+- `GET /api/v1/item-types/{id}/attributes`: listar definiciones por orden de presentación.
 - `PUT /api/v1/item-types/{id}/attributes/{attributeId}`: modificar una definición.
+
+Las plantillas globales se pueden consultar, pero sus definiciones no se pueden modificar desde la API normal. Cada coleccionista puede administrar las definiciones de sus tipos personales.
 
 ### Elementos del catálogo
 
-- `POST /api/v1/items`: crear un elemento, sus identificadores y valores de atributos.
-- `GET /api/v1/items`: listar con paginación y filtros opcionales por tipo y título.
+- `POST /api/v1/items`: crear un elemento y sus valores de atributos.
+- `GET /api/v1/items`: listar con paginación y filtro opcional por tipo.
 - `GET /api/v1/items/{id}`: consultar la ficha completa.
-- `PUT /api/v1/items/{id}`: modificar la ficha y sus datos asociados.
-- `DELETE /api/v1/items/{id}`: eliminar la ficha si no está referenciada por datos de colección.
 
-La última condición deberá comprobarse al integrar `collection-service`; hasta entonces la eliminación puede ser física en el catálogo inicial.
+La ficha guarda los valores dinámicos en `attribute_value`; la API valida cada valor según el tipo declarado en `AttributeDefinition`.
 
 ## Validaciones y errores
 
