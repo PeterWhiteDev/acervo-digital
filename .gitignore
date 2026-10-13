@@ -1,0 +1,8 @@
+**/target/
+**/*.mv.db
+**/*.trace.db
+**/node_modules/
+**/dist/
+**/.angular/
+.idea/
+.vscode/
