@@ -53,6 +53,9 @@ public class CatalogItem {
     @OneToMany(mappedBy = "catalogItem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AttributeValue> attributeValues = new ArrayList<>();
 
+    @OneToMany(mappedBy = "catalogItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CatalogItemIdentifier> identifiers = new ArrayList<>();
+
     protected CatalogItem() {
     }
 
@@ -67,8 +70,25 @@ public class CatalogItem {
         return new CatalogItem(itemType, title, description, createdBy);
     }
 
+    void updateDetails(String title, String description) {
+        this.title = title;
+        this.description = description;
+    }
+
     void addAttributeValue(AttributeValue attributeValue) {
         attributeValues.add(attributeValue);
+    }
+
+    void addIdentifier(CatalogItemIdentifier identifier) {
+        identifiers.add(identifier);
+    }
+
+    void clearAttributeValues() {
+        attributeValues.clear();
+    }
+
+    void clearIdentifiers() {
+        identifiers.clear();
     }
 
     @PrePersist
@@ -117,5 +137,9 @@ public class CatalogItem {
 
     public List<AttributeValue> getAttributeValues() {
         return attributeValues;
+    }
+
+    public List<CatalogItemIdentifier> getIdentifiers() {
+        return identifiers;
     }
 }
