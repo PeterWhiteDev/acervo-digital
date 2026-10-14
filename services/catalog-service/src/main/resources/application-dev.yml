@@ -3,3 +3,8 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/demo
+
+acervo:
+  security:
+    jwt:
+      secret: ${ACERVO_JWT_SECRET:local-practice-only-secret-do-not-use-in-production}

@@ -2,6 +2,7 @@ package com.acervodigital.catalog.attribute;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.acervodigital.catalog.security.TestJwt;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class AttributeDefinitionControllerTests {
 
     private static final UUID BOOK_TYPE_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        private static final UUID COLLECTOR_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,7 +38,8 @@ class AttributeDefinitionControllerTests {
 
     @Test
     void listsSeededAttributesForGlobalTemplate() throws Exception {
-        mockMvc.perform(get("/api/v1/item-types/{itemTypeId}/attributes", BOOK_TYPE_ID))
+        mockMvc.perform(get("/api/v1/item-types/{itemTypeId}/attributes", BOOK_TYPE_ID)
+                        .with(TestJwt.asUser(COLLECTOR_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].attributeKey").value("autor"))
                 .andExpect(jsonPath("$[0].dataType").value("TEXT"))
@@ -58,6 +61,7 @@ class AttributeDefinitionControllerTests {
                 """;
 
         MvcResult createResult = mockMvc.perform(post("/api/v1/item-types/{itemTypeId}/attributes", itemTypeId)
+                        .with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(createRequest))
                 .andExpect(status().isCreated())
@@ -69,7 +73,8 @@ class AttributeDefinitionControllerTests {
         JsonNode created = objectMapper.readTree(createResult.getResponse().getContentAsString());
         UUID attributeId = UUID.fromString(created.get("id").asText());
 
-        mockMvc.perform(get("/api/v1/item-types/{itemTypeId}/attributes/{attributeId}", itemTypeId, attributeId))
+        mockMvc.perform(get("/api/v1/item-types/{itemTypeId}/attributes/{attributeId}", itemTypeId, attributeId)
+                        .with(TestJwt.asUser(COLLECTOR_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attributeKey").value("aforo"));
 
@@ -84,6 +89,7 @@ class AttributeDefinitionControllerTests {
                 """;
 
         mockMvc.perform(put("/api/v1/item-types/{itemTypeId}/attributes/{attributeId}", itemTypeId, attributeId)
+                        .with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(updateRequest))
                 .andExpect(status().isOk())
@@ -96,6 +102,7 @@ class AttributeDefinitionControllerTests {
     @Test
     void rejectsChangesToGlobalTemplates() throws Exception {
         mockMvc.perform(post("/api/v1/item-types/{itemTypeId}/attributes", BOOK_TYPE_ID)
+                        .with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -110,10 +117,29 @@ class AttributeDefinitionControllerTests {
     }
 
     @Test
+    void allowsAdminToAddAttributeToGlobalTemplate() throws Exception {
+        mockMvc.perform(post("/api/v1/item-types/{itemTypeId}/attributes", BOOK_TYPE_ID)
+                        .with(TestJwt.asAdmin(COLLECTOR_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Plantilla administrativa",
+                                  "attributeKey": "plantilla_admin",
+                                  "dataType": "TEXT",
+                                  "required": false,
+                                  "displayOrder": 20
+                                }
+                                """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.attributeKey").value("plantilla_admin"));
+    }
+
+    @Test
     void rejectsInvalidAttributeDefinition() throws Exception {
         UUID itemTypeId = createPersonalType();
 
         mockMvc.perform(post("/api/v1/item-types/{itemTypeId}/attributes", itemTypeId)
+                        .with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -129,7 +155,7 @@ class AttributeDefinitionControllerTests {
 
     private UUID createPersonalType() throws Exception {
         String typeName = "Juegos " + UUID.randomUUID();
-        MvcResult result = mockMvc.perform(post("/api/v1/item-types")
+        MvcResult result = mockMvc.perform(post("/api/v1/item-types").with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"" + typeName + "\"}"))
                 .andExpect(status().isCreated())

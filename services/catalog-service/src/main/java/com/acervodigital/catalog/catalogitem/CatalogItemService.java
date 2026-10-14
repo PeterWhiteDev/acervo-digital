@@ -92,6 +92,10 @@ public class CatalogItemService {
     public CatalogItemResponse update(UUID id, UpdateCatalogItemRequest request) {
         CatalogItem item = catalogItemRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Elemento no encontrado"));
+        UUID collectorId = currentCollectorProvider.getCurrentCollectorId();
+        if (!collectorId.equals(item.getCreatedBy()) && !currentCollectorProvider.isAdmin()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "No se puede modificar una ficha ajena");
+        }
         Map<String, AttributeDefinition> definitions = findDefinitions(item.getItemType());
         Map<String, String> values = validateAttributeValues(request.attributes(), definitions);
         List<NormalizedIdentifier> identifiers = validateIdentifiers(request.identifiers(), item.getId());

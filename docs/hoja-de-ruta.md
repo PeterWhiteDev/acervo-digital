@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-- Última versión publicada: `v0.1.0`; `v0.2.0` está validada funcionalmente y en preparación para publicación.
+- Última versión publicada: `v0.2.0`.
 - Rama principal: `master`.
 - Stack actual: Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway.
 - Interfaz Angular y PostgreSQL quedan para hitos posteriores.
@@ -20,7 +20,7 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 - Datos de demostración para largometrajes de Guy Ritchie y Quentin Tarantino, y clásicos de la literatura española.
 - Migraciones Flyway, pruebas y publicación del release `v0.1.0`.
 
-### `0.2.0` — Completar catálogo: validado, pendiente de publicación
+### `0.2.0` — Completar catálogo: completado
 
 - Añadir varios identificadores opcionales por ficha, como ISBN-10, ISBN-13, EAN y códigos de edición.
 - Definir normalización, validación y reglas de unicidad por esquema.
@@ -28,14 +28,16 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 
 **Criterio de aceptación:** crear, consultar y actualizar un libro con más de un identificador; rechazar identificadores inválidos o duplicados según las reglas acordadas.
 
-La implementación está integrada en `develop` y validada con pruebas y Bruno. La protección de borrado se traslada a `0.4.0`, cuando exista `collection-service` y puedan comprobarse referencias reales.
+La implementación está publicada y validada con pruebas y Bruno. La protección de borrado se traslada a `0.4.0`, cuando exista `collection-service` y puedan comprobarse referencias reales.
 
-### `0.3.0` — Usuarios y seguridad
+### `0.3.0` — Usuarios y seguridad: en curso
 
 - Incorporar usuarios y perfiles reales de coleccionista.
 - Añadir roles `USER` y `ADMIN` y autenticación/autorización con JWT.
 - Sustituir `DevelopmentCollectorProvider` por el usuario autenticado.
 - Restringir tipos personales a su propietario y permitir la administración de plantillas globales solo a administradores.
+
+El flujo inicial de registro/login, JWT HS256 y autorización del catálogo está implementado y validado en STS/Bruno. La integración a `develop` sigue pendiente.
 
 **Criterio de aceptación:** usuarios distintos no pueden consultar ni modificar recursos personales ajenos; los permisos administrativos se verifican mediante pruebas.
 

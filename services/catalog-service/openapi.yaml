@@ -1,0 +1,682 @@
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.0/schema/2021-09-28
+openapi: 3.0.3
+info:
+  title: Acervo Digital - Catalog Service
+  version: 0.3.0
+  description: >-
+    Contrato HTTP del servicio de catálogo. Describe las operaciones implementadas
+    en la API v1, protegidas con JWT HS256 emitidos por identity-service.
+servers:
+  - url: http://localhost:8081
+    description: Entorno local de desarrollo
+security:
+  - BearerAuth: []
+tags:
+  - name: Tipos de elemento
+  - name: Definiciones de atributos
+  - name: Elementos del catálogo
+paths:
+  /api/v1/item-types:
+    get:
+      tags:
+        - Tipos de elemento
+      operationId: listItemTypes
+      summary: Lista los tipos visibles para el coleccionista actual
+      responses:
+        '200':
+          description: Tipos globales y tipos personales del coleccionista actual
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ItemType'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Tipos de elemento
+      operationId: createPersonalItemType
+      summary: Crea un tipo personal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateItemTypeRequest'
+      responses:
+        '201':
+          description: Tipo personal creado
+          headers:
+            Location:
+              description: URI del tipo creado
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemType'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Ya existe un tipo personal con ese nombre
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/item-types/{id}:
+    get:
+      tags:
+        - Tipos de elemento
+      operationId: getItemType
+      summary: Consulta un tipo visible
+      parameters:
+        - $ref: '#/components/parameters/UuidPathId'
+      responses:
+        '200':
+          description: Tipo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ItemType'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/item-types/{itemTypeId}/attributes:
+    get:
+      tags:
+        - Definiciones de atributos
+      operationId: listAttributeDefinitions
+      summary: Lista los atributos de un tipo visible
+      parameters:
+        - $ref: '#/components/parameters/ItemTypeId'
+      responses:
+        '200':
+          description: Definiciones ordenadas por presentación y nombre
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttributeDefinition'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Definiciones de atributos
+      operationId: createAttributeDefinition
+      summary: Añade una definición a un tipo personal
+      parameters:
+        - $ref: '#/components/parameters/ItemTypeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttributeDefinitionRequest'
+      responses:
+        '201':
+          description: Definición creada
+          headers:
+            Location:
+              description: URI de la definición creada
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttributeDefinition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Las plantillas globales no se pueden modificar
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Ya existe una definición con esa clave en el tipo
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/item-types/{itemTypeId}/attributes/{attributeId}:
+    get:
+      tags:
+        - Definiciones de atributos
+      operationId: getAttributeDefinition
+      summary: Consulta una definición de atributo
+      parameters:
+        - $ref: '#/components/parameters/ItemTypeId'
+        - $ref: '#/components/parameters/AttributeId'
+      responses:
+        '200':
+          description: Definición encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttributeDefinition'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - Definiciones de atributos
+      operationId: updateAttributeDefinition
+      summary: Reemplaza una definición de atributo de un tipo personal
+      parameters:
+        - $ref: '#/components/parameters/ItemTypeId'
+        - $ref: '#/components/parameters/AttributeId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttributeDefinitionRequest'
+      responses:
+        '200':
+          description: Definición actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttributeDefinition'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: Las plantillas globales no se pueden modificar
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Ya existe una definición con esa clave en el tipo
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/items:
+    get:
+      tags:
+        - Elementos del catálogo
+      operationId: listCatalogItems
+      summary: Lista fichas del catálogo de forma paginada
+      parameters:
+        - name: itemTypeId
+          in: query
+          required: false
+          description: Filtra las fichas por tipo de elemento
+          schema:
+            type: string
+            format: uuid
+        - name: page
+          in: query
+          required: false
+          description: Índice de página basado en cero
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: size
+          in: query
+          required: false
+          description: Número de elementos por página
+          schema:
+            type: integer
+            minimum: 1
+            default: 20
+        - name: sort
+          in: query
+          required: false
+          description: >-
+            Propiedad de ordenación y dirección, por ejemplo title,asc.
+            Se puede repetir para añadir criterios.
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+            default:
+              - title
+      responses:
+        '200':
+          description: Página de fichas del catálogo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItemPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Elementos del catálogo
+      operationId: createCatalogItem
+      summary: Crea una ficha del catálogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCatalogItemRequest'
+      responses:
+        '201':
+          description: Ficha creada
+          headers:
+            Location:
+              description: URI de la ficha creada
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Tipo de elemento no encontrado o no visible
+        '409':
+          description: Uno de los identificadores ya está asociado a otra ficha
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/items/{id}:
+    get:
+      tags:
+        - Elementos del catálogo
+      operationId: getCatalogItem
+      summary: Consulta una ficha del catálogo
+      parameters:
+        - $ref: '#/components/parameters/UuidPathId'
+      responses:
+        '200':
+          description: Ficha encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    put:
+      tags:
+        - Elementos del catálogo
+      operationId: updateCatalogItem
+      summary: Reemplaza los campos editables de una ficha
+      description: >-
+        Reemplaza título, descripción, identificadores y atributos. El tipo de
+        elemento no se modifica; las listas de identificadores y atributos se
+        reemplazan por completo.
+      parameters:
+        - $ref: '#/components/parameters/UuidPathId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCatalogItemRequest'
+      responses:
+        '200':
+          description: Ficha actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogItem'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          description: La ficha pertenece a otro coleccionista
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Uno de los identificadores ya está asociado a otra ficha
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token HS256 emitido por identity-service con UUID del coleccionista en sub.
+  parameters:
+    UuidPathId:
+      name: id
+      in: path
+      required: true
+      description: Identificador UUID del recurso
+      schema:
+        type: string
+        format: uuid
+    ItemTypeId:
+      name: itemTypeId
+      in: path
+      required: true
+      description: Identificador UUID del tipo de elemento
+      schema:
+        type: string
+        format: uuid
+    AttributeId:
+      name: attributeId
+      in: path
+      required: true
+      description: Identificador UUID de la definición de atributo
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: La petición no supera la validación de entrada
+    NotFound:
+      description: El recurso no existe o no es visible para el coleccionista actual
+    Unauthorized:
+      description: Falta un bearer token válido o ha expirado
+  schemas:
+    ItemType:
+      type: object
+      required:
+        - id
+        - name
+        - scope
+        - active
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+        scope:
+          type: string
+          enum:
+            - GLOBAL
+            - PERSONAL
+        active:
+          type: boolean
+    CreateItemTypeRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 500
+    AttributeDefinition:
+      type: object
+      required:
+        - id
+        - itemTypeId
+        - name
+        - attributeKey
+        - dataType
+        - required
+        - displayOrder
+      properties:
+        id:
+          type: string
+          format: uuid
+        itemTypeId:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        attributeKey:
+          type: string
+          maxLength: 100
+          pattern: '^[a-z][a-z0-9_]*$'
+        dataType:
+          $ref: '#/components/schemas/AttributeDataType'
+        required:
+          type: boolean
+        displayOrder:
+          type: integer
+          minimum: 0
+    AttributeDefinitionRequest:
+      type: object
+      required:
+        - name
+        - attributeKey
+        - dataType
+        - required
+        - displayOrder
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        attributeKey:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: '^[a-z][a-z0-9_]*$'
+        dataType:
+          $ref: '#/components/schemas/AttributeDataType'
+        required:
+          type: boolean
+        displayOrder:
+          type: integer
+          minimum: 0
+    AttributeDataType:
+      type: string
+      enum:
+        - TEXT
+        - INTEGER
+        - DECIMAL
+        - DATE
+        - BOOLEAN
+    IdentifierScheme:
+      type: string
+      enum:
+        - ISBN_10
+        - ISBN_13
+        - EAN_13
+        - EDITION_CODE
+    CatalogItemIdentifier:
+      type: object
+      required:
+        - scheme
+        - value
+      properties:
+        scheme:
+          $ref: '#/components/schemas/IdentifierScheme'
+        value:
+          type: string
+          maxLength: 100
+          description: Valor normalizado por el servicio
+    CatalogItemIdentifierRequest:
+      type: object
+      required:
+        - scheme
+        - value
+      properties:
+        scheme:
+          $ref: '#/components/schemas/IdentifierScheme'
+        value:
+          type: string
+          minLength: 1
+          maxLength: 120
+          description: >-
+            ISBN/EAN acepta espacios y guiones que se eliminan al normalizar;
+            EDITION_CODE se almacena en mayúsculas.
+    CatalogItemAttribute:
+      type: object
+      required:
+        - name
+        - attributeKey
+        - dataType
+        - value
+      properties:
+        name:
+          type: string
+        attributeKey:
+          type: string
+        dataType:
+          $ref: '#/components/schemas/AttributeDataType'
+        value:
+          type: string
+    CreateCatalogItemRequest:
+      type: object
+      required:
+        - itemTypeId
+        - title
+      properties:
+        itemTypeId:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          maxLength: 2000
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItemIdentifierRequest'
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: Valores de atributos indexados por su attributeKey
+    UpdateCatalogItemRequest:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          maxLength: 2000
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItemIdentifierRequest'
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+          description: Valores de atributos indexados por su attributeKey
+    CatalogItem:
+      type: object
+      required:
+        - id
+        - itemTypeId
+        - itemTypeName
+        - title
+        - createdAt
+        - identifiers
+        - attributes
+      properties:
+        id:
+          type: string
+          format: uuid
+        itemTypeId:
+          type: string
+          format: uuid
+        itemTypeName:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+          nullable: true
+        imageReference:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        identifiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItemIdentifier'
+        attributes:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItemAttribute'
+    CatalogItemPage:
+      type: object
+      required:
+        - content
+        - pageable
+        - totalElements
+        - totalPages
+        - size
+        - number
+        - sort
+        - numberOfElements
+        - first
+        - last
+        - empty
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogItem'
+        pageable:
+          $ref: '#/components/schemas/PageableMetadata'
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+        size:
+          type: integer
+        number:
+          type: integer
+          description: Índice de página basado en cero
+        sort:
+          $ref: '#/components/schemas/SortMetadata'
+        numberOfElements:
+          type: integer
+        first:
+          type: boolean
+        last:
+          type: boolean
+        empty:
+          type: boolean
+    PageableMetadata:
+      type: object
+      properties:
+        pageNumber:
+          type: integer
+        pageSize:
+          type: integer
+        offset:
+          type: integer
+          format: int64
+        paged:
+          type: boolean
+        unpaged:
+          type: boolean
+        sort:
+          $ref: '#/components/schemas/SortMetadata'
+    SortMetadata:
+      type: object
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
