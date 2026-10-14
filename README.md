@@ -8,7 +8,7 @@ Monorepositorio para una aplicacion de colecciones personales. El nombre es prov
 - `frontend`: reservado para la interfaz Angular.
 - `docs`: analisis de requisitos y diseño tecnico.
 
-El proyecto usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La base H2 local se guarda en el directorio de trabajo desde el que se inicia el servicio.
+El proyecto usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La base H2 local se guarda en el directorio de trabajo desde el que se inicia el servicio. La versión Maven en preparación es `0.2.0`; la última release publicada es `v0.1.0`.
 
 ## Tipos de elemento
 

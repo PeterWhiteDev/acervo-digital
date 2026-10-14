@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-- Última versión publicada: `v0.1.0`.
+- Última versión publicada: `v0.1.0`; `v0.2.0` está validada funcionalmente y en preparación para publicación.
 - Rama principal: `master`.
 - Stack actual: Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway.
 - Interfaz Angular y PostgreSQL quedan para hitos posteriores.
@@ -20,14 +20,15 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 - Datos de demostración para largometrajes de Guy Ritchie y Quentin Tarantino, y clásicos de la literatura española.
 - Migraciones Flyway, pruebas y publicación del release `v0.1.0`.
 
-### `0.2.0` — Completar catálogo: siguiente hito
+### `0.2.0` — Completar catálogo: validado, pendiente de publicación
 
 - Añadir varios identificadores opcionales por ficha, como ISBN-10, ISBN-13, EAN y códigos de edición.
 - Definir normalización, validación y reglas de unicidad por esquema.
 - Permitir consultar y modificar fichas con identificadores.
-- Proteger la eliminación de fichas cuando existan referencias desde colecciones o listas de deseos.
 
 **Criterio de aceptación:** crear, consultar y actualizar un libro con más de un identificador; rechazar identificadores inválidos o duplicados según las reglas acordadas.
+
+La implementación está integrada en `develop` y validada con pruebas y Bruno. La protección de borrado se traslada a `0.4.0`, cuando exista `collection-service` y puedan comprobarse referencias reales.
 
 ### `0.3.0` — Usuarios y seguridad
 
@@ -43,6 +44,7 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 - Crear `collection-service`.
 - Permitir varias colecciones por coleccionista y establecer visibilidad `PRIVATE` o `PUBLIC`.
 - Añadir ejemplares privados que referencien fichas del catálogo.
+- Proteger el borrado de fichas del catálogo que estén referenciadas por ejemplares o listas de deseos.
 - Guardar estado, ubicación, fecha de adquisición, precio de compra, valor actual en euros y notas.
 
 **Criterio de aceptación:** un usuario puede organizar varios ejemplares en colecciones distintas, incluso si comparten ficha de catálogo; la privacidad se respeta.
@@ -74,7 +76,7 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 
 ## Forma de trabajo y versiones
 
-- Cada hito se desarrolla en una rama de trabajo y se integra mediante Pull Request a `master`.
+- Cada funcionalidad se desarrolla en una rama `feature/*` creada desde `develop` y se integra mediante Pull Request a `develop`. Para publicar una versión, se integra `develop` en `master` mediante Pull Request.
 - Antes de cerrar un hito, el usuario ejecuta Maven y las pruebas desde STS y valida los flujos manuales acordados.
 - Al completar un hito, se actualiza la versión Maven, se crea el tag correspondiente (`v0.2.0`, `v0.3.0`, etc.) y se publica un GitHub Release.
 - Los cambios de versión y etiquetas se hacen después de validar el hito, no en cada commit.
