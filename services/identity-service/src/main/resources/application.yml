@@ -1,0 +1,30 @@
+spring:
+  profiles:
+    default: dev
+  application:
+    name: identity-service
+  datasource:
+    url: jdbc:h2:file:./identity-db;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8082
+
+acervo:
+  security:
+    jwt:
+      secret: ${ACERVO_JWT_SECRET}
+      issuer: acervo-identity
+      access-token-minutes: 15

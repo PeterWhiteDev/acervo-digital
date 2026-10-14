@@ -5,10 +5,28 @@ Monorepositorio para una aplicacion de colecciones personales. El nombre es prov
 ## Estructura
 
 - `services/catalog-service`: primera API Spring Boot para el catalogo comun.
+- `services/identity-service`: registro de coleccionistas y emisión de tokens JWT.
 - `frontend`: reservado para la interfaz Angular.
 - `docs`: analisis de requisitos y diseño tecnico.
 
-El proyecto usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La base H2 local se guarda en el directorio de trabajo desde el que se inicia el servicio. La versión Maven en preparación es `0.2.0`; la última release publicada es `v0.1.0`.
+El proyecto usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La base H2 local se guarda en el directorio de trabajo desde el que se inicia el servicio. La última release publicada es `v0.2.0`; `v0.3.0` está en preparación.
+
+## Identidad y autenticación
+
+El servicio de identidad escucha en el puerto `8082` y ofrece:
+
+- `POST /api/v1/auth/register`: crea una cuenta con perfil básico y rol `USER`.
+- `POST /api/v1/auth/token`: valida email y contraseña y devuelve un JWT HS256 válido durante 15 minutos.
+
+Las rutas del catálogo requieren `Authorization: Bearer <accessToken>`. En desarrollo ambos servicios usan el mismo secreto local de práctica; puede sustituirse mediante `ACERVO_JWT_SECRET`. No uses el valor local fuera de desarrollo.
+
+Los roles no se aceptan en el registro. Las cuentas nuevas reciben `USER`. Para la práctica local, se puede promover una cuenta a `ADMIN` desde la consola H2 de identity-service (`http://localhost:8082/h2-console`):
+
+```sql
+UPDATE collector_account SET role = 'ADMIN' WHERE email = 'admin@example.test';
+```
+
+Después de cambiar el rol, inicia sesión de nuevo para recibir un token con el claim actualizado. Este mecanismo es solo para desarrollo; no se debe habilitar como procedimiento de producción.
 
 ## Tipos de elemento
 
@@ -18,7 +36,7 @@ La primera migracion crea las plantillas globales `Libro` y `Pelicula`. La API p
 - `GET /api/v1/item-types/{id}`
 - `POST /api/v1/item-types`
 
-Mientras no haya autenticacion, el coleccionista actual usa el UUID de desarrollo configurado en `application.yml`. Este proveedor se sustituira al integrar identidad/JWT.
+El catálogo obtiene el UUID del coleccionista autenticado desde el claim `sub` del JWT.
 
 ## Atributos de los tipos
 
@@ -44,6 +62,10 @@ Ejemplo de alta para un tipo personal:
 ```
 
 ## Elementos del catalogo
+
+El contrato OpenAPI 3.0.3 del API actual está en [`services/catalog-service/openapi.yaml`](services/catalog-service/openapi.yaml). Describe las rutas implementadas bajo `/api/v1`, protegidas con bearer JWT emitidos por `identity-service`.
+
+El contrato inicial de identidad está en [`services/identity-service/openapi.yaml`](services/identity-service/openapi.yaml) e incluye registro y emisión de tokens.
 
 El perfil `dev` carga datos de ejemplo mediante Flyway: 17 largometrajes dirigidos por Guy Ritchie, 10 largometrajes de Quentin Tarantino y 10 clasicos de la literatura espanola. Se excluyen cortos, television y segmentos de peliculas de antologia. Los dos volumenes de `Kill Bill` se guardan como fichas distintas. El perfil `test` no carga estos registros.
 
@@ -79,6 +101,7 @@ Desde la raiz del proyecto:
 ```powershell
 mvn test
 mvn -pl services/catalog-service spring-boot:run
+mvn -pl services/identity-service spring-boot:run
 ```
 
-La API se iniciara en `http://localhost:8081`. La consola H2 estara disponible en `/h2-console` durante el desarrollo.
+El catálogo se inicia en `http://localhost:8081` y el servicio de identidad en `http://localhost:8082`. La consola H2 estará disponible en `/h2-console` durante el desarrollo.

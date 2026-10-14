@@ -1,0 +1,126 @@
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.0/schema/2021-09-28
+openapi: 3.0.3
+info:
+  title: Acervo Digital - Identity Service
+  version: 0.3.0
+  description: Registro de coleccionistas y emisión de tokens JWT HS256.
+servers:
+  - url: http://localhost:8082
+    description: Entorno local de desarrollo
+paths:
+  /api/v1/auth/register:
+    post:
+      operationId: registerCollector
+      summary: Registra una cuenta de coleccionista
+      description: El rol siempre se asigna en el servidor y una cuenta nueva recibe USER.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCollectorRequest'
+      responses:
+        '201':
+          description: Cuenta y perfil creados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collector'
+        '400':
+          description: La petición no supera la validación
+        '409':
+          description: Ya existe una cuenta con ese email
+  /api/v1/auth/token:
+    post:
+      operationId: createAccessToken
+      summary: Autentica una cuenta y emite un token de acceso
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTokenRequest'
+      responses:
+        '200':
+          description: Token firmado emitido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: La petición no supera la validación
+        '401':
+          description: Email o contraseña incorrectos
+components:
+  schemas:
+    RegisterCollectorRequest:
+      type: object
+      required:
+        - email
+        - password
+        - displayName
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+    CreateTokenRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+    Collector:
+      type: object
+      required:
+        - collectorId
+        - email
+        - displayName
+        - role
+      properties:
+        collectorId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        role:
+          type: string
+          enum:
+            - USER
+            - ADMIN
+    TokenResponse:
+      type: object
+      required:
+        - accessToken
+        - tokenType
+        - expiresInSeconds
+      properties:
+        accessToken:
+          type: string
+          description: JWT firmado con HS256
+        tokenType:
+          type: string
+          enum:
+            - Bearer
+        expiresInSeconds:
+          type: integer
+          format: int64

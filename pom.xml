@@ -13,7 +13,7 @@
 
     <groupId>com.acervodigital</groupId>
     <artifactId>acervo-digital-parent</artifactId>
-    <version>0.2.0</version>
+    <version>0.3.0</version>
     <packaging>pom</packaging>
 
     <name>Acervo Digital</name>
@@ -21,9 +21,11 @@
 
     <modules>
         <module>services/catalog-service</module>
+        <module>services/identity-service</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
+        <jjwt.version>0.12.6</jjwt.version>
     </properties>
 </project>
