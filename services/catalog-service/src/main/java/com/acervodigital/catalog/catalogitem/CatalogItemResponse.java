@@ -13,6 +13,7 @@ public record CatalogItemResponse(
         String description,
         String imageReference,
         Instant createdAt,
+        List<CatalogItemIdentifierResponse> identifiers,
         List<CatalogItemAttributeResponse> attributes
 ) {
 
@@ -20,6 +21,10 @@ public record CatalogItemResponse(
         List<CatalogItemAttributeResponse> attributes = item.getAttributeValues().stream()
                 .sorted(Comparator.comparingInt(value -> value.getAttributeDefinition().getDisplayOrder()))
                 .map(CatalogItemAttributeResponse::from)
+                .toList();
+        List<CatalogItemIdentifierResponse> identifiers = item.getIdentifiers().stream()
+                .sorted(Comparator.comparing(identifier -> identifier.getScheme().name()))
+                .map(CatalogItemIdentifierResponse::from)
                 .toList();
         return new CatalogItemResponse(
                 item.getId(),
@@ -29,6 +34,7 @@ public record CatalogItemResponse(
                 item.getDescription(),
                 item.getImageReference(),
                 item.getCreatedAt(),
+                identifiers,
                 attributes
         );
     }

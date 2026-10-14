@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.net.URI;
 import java.util.UUID;
@@ -37,6 +38,14 @@ public class CatalogItemController {
     @GetMapping("/{id}")
     public CatalogItemResponse findById(@PathVariable UUID id) {
         return service.findById(id);
+    }
+
+    @PutMapping("/{id}")
+    public CatalogItemResponse update(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateCatalogItemRequest request
+    ) {
+        return service.update(id, request);
     }
 
     @PostMapping

@@ -8,7 +8,7 @@ Monorepositorio para una aplicacion de colecciones personales. El nombre es prov
 - `frontend`: reservado para la interfaz Angular.
 - `docs`: analisis de requisitos y diseño tecnico.
 
-El proyecto usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La base H2 local se guarda en el directorio de trabajo desde el que se inicia el servicio.
+El proyecto usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La base H2 local se guarda en el directorio de trabajo desde el que se inicia el servicio. La versión Maven en preparación es `0.2.0`; la última release publicada es `v0.1.0`.
 
 ## Tipos de elemento
 
@@ -50,6 +50,7 @@ El perfil `dev` carga datos de ejemplo mediante Flyway: 17 largometrajes dirigid
 - `GET /api/v1/items?itemTypeId={id}&size=50`: listar de forma paginada, opcionalmente por tipo.
 - `GET /api/v1/items/{id}`: consultar una ficha con sus atributos.
 - `POST /api/v1/items`: crear una ficha.
+- `PUT /api/v1/items/{id}`: reemplazar el título, la descripción, los identificadores y los atributos de una ficha existente. El tipo de elemento no se modifica.
 
 Para consultar las peliculas de ejemplo, usa `itemTypeId=22222222-2222-2222-2222-222222222222`; para los libros, `itemTypeId=11111111-1111-1111-1111-111111111111`.
 
@@ -66,6 +67,8 @@ Ejemplo de alta de un libro:
 	}
 }
 ```
+
+La actualización usa los mismos campos editables y reemplaza por completo las listas de identificadores y atributos. Para conservar un identificador existente, inclúyelo en la petición `PUT`.
 
 La filmografia se limita a peliculas dirigidas: [Guy Ritchie](https://en.wikipedia.org/wiki/Guy_Ritchie#Filmography) y [Quentin Tarantino](https://en.wikipedia.org/wiki/List_of_works_by_Quentin_Tarantino). Los datos incluyen titulo, director o autor y ano de estreno o publicacion; no representan una edicion concreta ni incluyen ISBN.
 
