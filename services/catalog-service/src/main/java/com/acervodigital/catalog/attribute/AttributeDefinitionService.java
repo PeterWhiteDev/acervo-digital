@@ -104,7 +104,7 @@ public class AttributeDefinitionService {
 
     private ItemType findEditableItemType(UUID itemTypeId) {
         ItemType itemType = findVisibleItemType(itemTypeId);
-        if (itemType.getScope() == ItemTypeScope.GLOBAL) {
+        if (itemType.getScope() == ItemTypeScope.GLOBAL && !currentCollectorProvider.isAdmin()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Las plantillas globales no se pueden modificar");
         }
         return itemType;

@@ -2,6 +2,7 @@ package com.acervodigital.catalog.catalogitem;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.acervodigital.catalog.security.TestJwt;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class CatalogItemControllerTests {
 
     private static final UUID BOOK_TYPE_ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
+    private static final UUID COLLECTOR_ID = UUID.fromString("33333333-3333-3333-3333-333333333333");
+    private static final UUID OTHER_COLLECTOR_ID = UUID.fromString("44444444-4444-4444-4444-444444444444");
 
     @Autowired
     private MockMvc mockMvc;
@@ -51,7 +54,7 @@ class CatalogItemControllerTests {
                 }
                 """.formatted(BOOK_TYPE_ID);
 
-        MvcResult result = mockMvc.perform(post("/api/v1/items")
+        MvcResult result = mockMvc.perform(post("/api/v1/items").with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isCreated())
@@ -67,7 +70,7 @@ class CatalogItemControllerTests {
         JsonNode created = objectMapper.readTree(result.getResponse().getContentAsString());
         UUID itemId = UUID.fromString(created.get("id").asText());
 
-        mockMvc.perform(get("/api/v1/items/{id}", itemId))
+        mockMvc.perform(get("/api/v1/items/{id}", itemId).with(TestJwt.asUser(COLLECTOR_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(itemId.toString()))
                 .andExpect(jsonPath("$.identifiers.length()").value(2))
@@ -89,6 +92,7 @@ class CatalogItemControllerTests {
           """.formatted(editionCode);
 
         mockMvc.perform(put("/api/v1/items/{id}", itemId)
+          .with(TestJwt.asUser(COLLECTOR_ID))
             .contentType(MediaType.APPLICATION_JSON)
             .content(updateRequest))
           .andExpect(status().isOk())
@@ -100,7 +104,7 @@ class CatalogItemControllerTests {
           .andExpect(jsonPath("$.attributes.length()").value(1))
           .andExpect(jsonPath("$.attributes[0].value").value("Autora actualizada"));
 
-        mockMvc.perform(get("/api/v1/items/{id}", itemId))
+        mockMvc.perform(get("/api/v1/items/{id}", itemId).with(TestJwt.asUser(COLLECTOR_ID)))
           .andExpect(status().isOk())
           .andExpect(jsonPath("$.title").value("Libro actualizado"))
           .andExpect(jsonPath("$.identifiers.length()").value(2))
@@ -121,7 +125,7 @@ class CatalogItemControllerTests {
                 }
                 """.formatted(BOOK_TYPE_ID);
 
-        mockMvc.perform(post("/api/v1/items")
+        mockMvc.perform(post("/api/v1/items").with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isConflict());
@@ -140,7 +144,7 @@ class CatalogItemControllerTests {
                 }
                 """.formatted(BOOK_TYPE_ID);
 
-        mockMvc.perform(post("/api/v1/items")
+        mockMvc.perform(post("/api/v1/items").with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest());
@@ -158,9 +162,34 @@ class CatalogItemControllerTests {
                 }
                 """.formatted(BOOK_TYPE_ID);
 
-        mockMvc.perform(post("/api/v1/items")
+        mockMvc.perform(post("/api/v1/items").with(TestJwt.asUser(COLLECTOR_ID))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(request))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejectsUpdateByAnotherCollector() throws Exception {
+        String request = """
+                {
+                  "itemTypeId": "%s",
+                  "title": "Ficha privada",
+                  "attributes": {}
+                }
+                """.formatted(BOOK_TYPE_ID);
+        MvcResult result = mockMvc.perform(post("/api/v1/items").with(TestJwt.asUser(COLLECTOR_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(request))
+                .andExpect(status().isCreated())
+                .andReturn();
+        UUID itemId = UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("id")
+                .asText());
+
+        mockMvc.perform(put("/api/v1/items/{id}", itemId)
+                        .with(TestJwt.asUser(OTHER_COLLECTOR_ID))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"title\":\"Intento ajeno\",\"attributes\":{}}"))
+                .andExpect(status().isForbidden());
     }
 }
