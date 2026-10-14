@@ -30,18 +30,18 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 
 La implementación está publicada y validada con pruebas y Bruno. La protección de borrado se traslada a `0.4.0`, cuando exista `collection-service` y puedan comprobarse referencias reales.
 
-### `0.3.0` — Usuarios y seguridad: en curso
+### `0.3.0` — Usuarios y seguridad: validado, pendiente de publicación
 
 - Incorporar usuarios y perfiles reales de coleccionista.
 - Añadir roles `USER` y `ADMIN` y autenticación/autorización con JWT.
 - Sustituir `DevelopmentCollectorProvider` por el usuario autenticado.
 - Restringir tipos personales a su propietario y permitir la administración de plantillas globales solo a administradores.
 
-El flujo inicial de registro/login, JWT HS256 y autorización del catálogo está implementado y validado en STS/Bruno. La integración a `develop` sigue pendiente.
+El flujo inicial de registro/login, JWT HS256 y autorización del catálogo está integrado en `develop` y validado con 20 pruebas y Bruno. La publicación `v0.3.0` está en preparación.
 
 **Criterio de aceptación:** usuarios distintos no pueden consultar ni modificar recursos personales ajenos; los permisos administrativos se verifican mediante pruebas.
 
-### `0.4.0` — Colecciones y ejemplares
+### `0.4.0` — Colecciones y ejemplares: siguiente hito
 
 - Crear `collection-service`.
 - Permitir varias colecciones por coleccionista y establecer visibilidad `PRIVATE` o `PUBLIC`.
