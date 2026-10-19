@@ -1,9 +1,8 @@
 :host { display: block; min-height: 100dvh; }
-.topbar { align-items: center; background: var(--ink); color: var(--paper); display: flex; gap: 3rem; min-height: 72px; padding: 0 clamp(1rem, 4vw, 4rem); }
-.brand { align-items: center; color: inherit; display: inline-flex; font-family: var(--display-font); font-size: 1.45rem; font-weight: 700; gap: .65rem; text-decoration: none; }
-.brand-mark { align-items: center; background: var(--signal); border-radius: 5px; color: var(--ink); display: inline-flex; height: 34px; justify-content: center; width: 34px; }
-.brand-mark svg, .primary-nav svg, .icon-button svg { height: 18px; width: 18px; }
-.brand-dot { color: var(--signal); }
+.topbar { align-items: center; background: var(--ink); color: var(--paper); display: flex; gap: 3rem; min-height: 72px; padding: 0 clamp(1rem, 4vw, 4rem); position: relative; z-index: 2; }
+.brand { align-items: center; color: inherit; display: inline-flex; text-decoration: none; }
+.primary-nav svg, .icon-button svg { height: 18px; width: 18px; }
+.hud-status, .log-note, .nav-index { display: none; }
 .primary-nav { align-items: stretch; align-self: stretch; display: flex; gap: .4rem; }
 .primary-nav a { align-items: center; border-bottom: 2px solid transparent; color: #cad5d0; display: inline-flex; font-size: .9rem; gap: .55rem; padding: 0 1rem; text-decoration: none; transition: color 150ms ease, border-color 150ms ease; }
 .primary-nav a:hover, .primary-nav a.is-active { border-bottom-color: var(--signal); color: white; }
@@ -11,7 +10,7 @@
 .account-email { color: #cad5d0; font-size: .8rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .icon-button { align-items: center; background: transparent; border: 1px solid #49615d; border-radius: 5px; color: white; cursor: pointer; display: inline-flex; height: 38px; justify-content: center; width: 38px; }
 .icon-button:hover { background: #29413d; }
-.workspace { margin: 0 auto; max-width: 1440px; padding: clamp(1.2rem, 3vw, 3rem) clamp(1rem, 4vw, 4rem) 4rem; }
+.workspace { margin: 0 auto; max-width: 1440px; padding: clamp(1.2rem, 3vw, 3rem) clamp(1rem, 4vw, 4rem) 5rem; position: relative; }
 @media (max-width: 740px) {
   .topbar { flex-wrap: wrap; gap: .6rem 1rem; padding-bottom: .65rem; padding-top: .65rem; }
   .brand { flex: 1; }

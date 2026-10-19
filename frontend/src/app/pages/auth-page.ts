@@ -1,13 +1,39 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { AuthService } from '../core/auth.service';
 import { uiIcons } from '../core/ui-icons';
+import { Brand } from '../theme/brand';
+import { ThemeService } from '../theme/theme.service';
+
+const THEME_COPY = {
+  classic: {
+    eyebrow: 'TU ARCHIVO, A TU MANERA',
+    lines: ['Lo que guardas', 'también cuenta'],
+    accent: 'una historia.',
+    note: 'Un lugar para ordenar tus libros, películas y todo lo que merece quedarse.',
+    index: 'COLECCIONA CON SENTIDO',
+  },
+  expedition: {
+    eyebrow: 'BITÁCORA · LAT 20º 000’ · HALLAZGOS',
+    lines: ['Cada objeto', 'guarda un mapa'],
+    accent: 'hacia su historia.',
+    note: 'Registra reliquias, cartografía tus colecciones y marca con una X lo que aún buscas.',
+    index: 'LA AVENTURA EMPIEZA EN TUS ESTANTES',
+  },
+  neon: {
+    eyebrow: 'SYS://ACERVO · NODO 06 · EN LÍNEA',
+    lines: ['Memoria', 'persistente para'],
+    accent: 'lo que importa.',
+    note: 'Archivo personal cifrado. Cada objeto, catalogado; cada recuerdo, a salvo de la lluvia.',
+    index: 'IDENTIFÍCATE PARA ACCEDER AL NÚCLEO',
+  },
+} as const;
 
 @Component({
   selector: 'app-auth-page',
-  imports: [FormsModule, RouterLink, LucideDynamicIcon],
+  imports: [FormsModule, RouterLink, LucideDynamicIcon, Brand],
   styleUrl: './auth-page.scss',
   templateUrl: './auth-page.html',
 })
@@ -15,6 +41,8 @@ export class AuthPage {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly theme = inject(ThemeService);
+  protected readonly copy = computed(() => THEME_COPY[this.theme.theme()]);
   protected readonly icons = uiIcons;
   protected readonly mode = signal<'login' | 'register'>('login');
   protected readonly loading = signal(false);
