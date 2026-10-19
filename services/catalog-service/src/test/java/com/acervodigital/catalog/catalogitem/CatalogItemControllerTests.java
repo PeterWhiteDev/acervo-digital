@@ -36,6 +36,34 @@ class CatalogItemControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
+        @Test
+        void publicCatalogLookupReturnsOnlyIdAndTitleWithoutAuthentication() throws Exception {
+      String request = """
+        {
+          "itemTypeId": "%s",
+          "title": "Ficha compartida",
+          "description": "No se expone en la ruta publica",
+          "attributes": {}
+        }
+        """.formatted(BOOK_TYPE_ID);
+      MvcResult result = mockMvc.perform(post("/api/v1/items").with(TestJwt.asUser(COLLECTOR_ID))
+          .contentType(MediaType.APPLICATION_JSON).content(request))
+        .andExpect(status().isCreated())
+        .andReturn();
+      UUID itemId = UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString())
+        .get("id").asText());
+
+      mockMvc.perform(get("/api/v1/public/items/{id}", itemId))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.id").value(itemId.toString()))
+        .andExpect(jsonPath("$.title").value("Ficha compartida"))
+        .andExpect(jsonPath("$.description").doesNotExist())
+        .andExpect(jsonPath("$.attributes").doesNotExist())
+        .andExpect(jsonPath("$.identifiers").doesNotExist());
+      mockMvc.perform(get("/api/v1/items/{id}", itemId))
+        .andExpect(status().isUnauthorized());
+        }
+
     @Test
     void createsAndReadsCatalogItemWithTypedAttributes() throws Exception {
         String request = """

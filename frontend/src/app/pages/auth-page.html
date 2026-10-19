@@ -1,0 +1,48 @@
+<main class="auth-page">
+  <section class="auth-aside">
+    <a class="auth-brand" routerLink="/login">
+      <svg [lucideIcon]="icons.LucideBookOpen" aria-hidden="true"></svg>
+      <span>acervo<span>.</span></span>
+    </a>
+    <div class="aside-copy">
+      <p class="eyebrow">TU ARCHIVO, A TU MANERA</p>
+      <h1>Lo que guardas<br />también cuenta<br /><em>una historia.</em></h1>
+      <p class="aside-note">Un lugar para ordenar tus libros, películas y todo lo que merece quedarse.</p>
+    </div>
+    <div class="aside-index"><span>01</span><span class="index-rule"></span><span>COLECCIONA CON SENTIDO</span></div>
+  </section>
+
+  <section class="auth-main">
+    <div class="auth-form-wrap">
+      <p class="eyebrow">ACERVO DIGITAL / ACCESO</p>
+      <h2>{{ mode() === 'login' ? 'Qué bueno verte.' : 'Empieza tu acervo.' }}</h2>
+      <p class="form-intro">{{ mode() === 'login' ? 'Entra para continuar donde lo dejaste.' : 'Crea tu cuenta y empieza a organizar tu colección.' }}</p>
+
+      <form (ngSubmit)="submit()" #form="ngForm">
+        @if (mode() === 'register') {
+          <label>Nombre visible
+            <input name="displayName" [(ngModel)]="displayName" required maxlength="100" autocomplete="name" />
+          </label>
+        }
+        <label>Correo electrónico
+          <input name="email" [(ngModel)]="email" required type="email" maxlength="254" autocomplete="email" />
+        </label>
+        <label>Contraseña
+          <input name="password" [(ngModel)]="password" required type="password" minlength="8" maxlength="72" [attr.autocomplete]="mode() === 'login' ? 'current-password' : 'new-password'" />
+        </label>
+        @if (error()) {
+          <p class="form-error" role="alert">{{ error() }}</p>
+        }
+        <button class="submit-button" type="submit" [disabled]="form.invalid || loading()">
+          {{ loading() ? 'Un momento…' : mode() === 'login' ? 'Entrar' : 'Crear cuenta' }}
+          <svg [lucideIcon]="icons.LucideArrowRight" aria-hidden="true"></svg>
+        </button>
+      </form>
+      <p class="auth-switch">
+        {{ mode() === 'login' ? '¿Todavía no tienes cuenta?' : '¿Ya tienes cuenta?' }}
+        <a [routerLink]="mode() === 'login' ? '/register' : '/login'">{{ mode() === 'login' ? 'Regístrate' : 'Inicia sesión' }}</a>
+      </p>
+    </div>
+    <span class="auth-foot">ACERVO DIGITAL <span>·</span> 2026</span>
+  </section>
+</main>

@@ -1,0 +1,57 @@
+<section class="page-heading">
+  <div><p class="eyebrow">ESTRUCTURA DEL CATÁLOGO</p><h1>Tipos y atributos</h1><p class="subtitle">Define qué datos describen cada clase de objeto.</p></div>
+</section>
+@if (success()) { <p class="notice success" role="status">{{ success() }}</p> }
+@if (error()) { <p class="notice error" role="alert">{{ error() }}</p> }
+
+<div class="types-layout">
+  <aside class="type-list">
+    <div class="section-heading"><h2>Tipos visibles</h2><span>{{ types().length }}</span></div>
+    @for (type of types(); track type.id) {
+      <button type="button" class="type-row" [class.selected]="selectedTypeId() === type.id" (click)="selectType(type.id)">
+        <span class="type-name">{{ type.name }}</span><span class="scope-label" [class.personal]="type.scope === 'PERSONAL'">{{ type.scope === 'GLOBAL' ? 'Global' : 'Personal' }}</span>
+      </button>
+    }
+    @if (!types().length) { <p class="empty-note">No hay tipos activos.</p> }
+  </aside>
+
+  <section class="type-detail">
+    @if (selectedType; as type) {
+      <header class="detail-heading">
+        <div><p class="eyebrow">{{ type.scope === 'GLOBAL' ? 'PLANTILLA GLOBAL' : 'TIPO PERSONAL' }}</p><h2>{{ type.name }}</h2><p>{{ type.description || 'Sin descripción.' }}</p></div>
+        <span class="definition-count">{{ attributes().length }} atributos</span>
+      </header>
+      <div class="definitions">
+        <div class="definition-head"><span>Nombre</span><span>Clave</span><span>Tipo de dato</span><span>Obligatorio</span></div>
+        @for (attribute of attributes(); track attribute.id) {
+          <div class="definition-row"><strong>{{ attribute.name }}</strong><code>{{ attribute.attributeKey }}</code><span>{{ attribute.dataType }}</span><span>{{ attribute.required ? 'Sí' : 'No' }}</span></div>
+        } @empty {
+          <p class="empty-note">{{ loading() ? 'Cargando atributos…' : 'Este tipo todavía no tiene atributos.' }}</p>
+        }
+      </div>
+      @if (type.scope === 'PERSONAL') {
+        <form class="inline-form" (ngSubmit)="createAttribute()" #attributeForm="ngForm">
+          <div class="form-title"><p class="eyebrow">AMPLIAR TIPO</p><h3>Nueva definición</h3></div>
+          <label>Nombre<input name="attributeName" [(ngModel)]="attributeName" (ngModelChange)="makeKey()" required maxlength="100" placeholder="Editorial" /></label>
+          <label>Clave<input name="attributeKey" [(ngModel)]="attributeKey" required maxlength="100" pattern="[a-z][a-z0-9_]*" /></label>
+          <label>Dato<select name="dataType" [(ngModel)]="dataType"><option value="TEXT">Texto</option><option value="INTEGER">Entero</option><option value="DECIMAL">Decimal</option><option value="DATE">Fecha</option><option value="BOOLEAN">Sí / No</option></select></label>
+          <label class="checkbox-label"><input type="checkbox" name="required" [(ngModel)]="required" /> Obligatorio</label>
+          <button class="primary-button" type="submit" [disabled]="attributeForm.invalid">Añadir atributo</button>
+        </form>
+      } @else {
+        <p class="readonly-note">Las plantillas globales las administra el equipo del catálogo.</p>
+      }
+    } @else {
+      <p class="empty-note">Selecciona un tipo para consultar sus atributos.</p>
+    }
+  </section>
+</div>
+
+<section class="new-type">
+  <div><p class="eyebrow">PERSONALIZA TU CATÁLOGO</p><h2>Crear tipo personal</h2><p>Los tipos personales solo son visibles para tu cuenta.</p></div>
+  <form (ngSubmit)="createType()" #typeForm="ngForm">
+    <label>Nombre<input name="typeName" [(ngModel)]="typeName" required maxlength="100" placeholder="Juego de mesa" /></label>
+    <label>Descripción<input name="typeDescription" [(ngModel)]="typeDescription" maxlength="500" placeholder="Opcional" /></label>
+    <button class="primary-button" type="submit" [disabled]="typeForm.invalid">Crear tipo</button>
+  </form>
+</section>
