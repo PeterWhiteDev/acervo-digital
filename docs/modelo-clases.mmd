@@ -1,0 +1,180 @@
+classDiagram
+direction LR
+
+namespace identity_service {
+  class CollectorAccount {
+    UUID id
+    String email
+    String passwordHash
+    CollectorRole role
+    CollectorProfile profile
+    Instant createdAt
+  }
+  class CollectorProfile {
+    String displayName
+  }
+  class CollectorRole {
+    <<enumeration>>
+    USER
+    ADMIN
+  }
+}
+
+namespace catalog_service {
+  class ItemType {
+    UUID id
+    ItemTypeScope scope
+    UUID ownerId
+    String name
+    String description
+    boolean active
+  }
+  class ItemTypeScope {
+    <<enumeration>>
+    GLOBAL
+    PERSONAL
+  }
+  class AttributeDefinition {
+    UUID id
+    String name
+    String attributeKey
+    AttributeDataType dataType
+    boolean required
+    int displayOrder
+  }
+  class AttributeDataType {
+    <<enumeration>>
+    TEXT
+    INTEGER
+    DECIMAL
+    DATE
+    BOOLEAN
+  }
+  class CatalogItem {
+    UUID id
+    String title
+    String description
+    UUID createdBy
+    String imageReference
+    Instant createdAt
+    Instant updatedAt
+  }
+  class AttributeValue {
+    UUID id
+    String value
+  }
+  class CatalogItemIdentifier {
+    UUID id
+    IdentifierScheme scheme
+    String value
+  }
+  class IdentifierScheme {
+    <<enumeration>>
+    ISBN_10
+    ISBN_13
+    EAN_13
+    EDITION_CODE
+  }
+  class Category {
+    <<planned>>
+    UUID id
+    String name
+  }
+  class Creator {
+    <<planned>>
+    UUID id
+    String name
+  }
+  class MainImage {
+    <<planned>>
+    UUID id
+    String storageReference
+  }
+}
+
+namespace collection_service {
+  class CollectionResource {
+    UUID id
+    UUID ownerId
+    String name
+    String description
+    CollectionVisibility visibility
+    Instant createdAt
+    Instant updatedAt
+  }
+  class CollectionVisibility {
+    <<enumeration>>
+    PRIVATE
+    PUBLIC
+  }
+  class Location {
+    UUID id
+    UUID ownerId
+    String name
+    String description
+    Instant createdAt
+    Instant updatedAt
+  }
+  class CollectionCopy {
+    UUID id
+    UUID catalogItemId
+    CopyCondition condition
+    LocalDate acquiredOn
+    BigDecimal purchasePrice
+    BigDecimal currentValue
+    String notes
+    Instant createdAt
+    Instant updatedAt
+  }
+  class CopyCondition {
+    <<enumeration>>
+    NEW
+    LIKE_NEW
+    GOOD
+    ACCEPTABLE
+    POOR
+  }
+  class Wishlist {
+    <<logical>>
+  }
+  class WishlistEntry {
+    UUID id
+    UUID catalogItemId
+    WishlistPriority priority
+    String notes
+  }
+  class WishlistPriority {
+    <<enumeration>>
+    LOW
+    MEDIUM
+    HIGH
+  }
+}
+
+CollectorAccount "1" *-- "1" CollectorProfile : embedded value
+ItemType "1" <-- "0..*" AttributeDefinition : itemType
+ItemType "1" <-- "0..*" CatalogItem : itemType
+CatalogItem "1" *-- "0..*" AttributeValue : cascade orphanRemoval
+AttributeDefinition "1" <-- "0..*" AttributeValue : attributeDefinition
+CatalogItem "1" *-- "0..*" CatalogItemIdentifier : cascade orphanRemoval
+CatalogItem "0..*" -- "0..*" Category : planned categories
+CatalogItem "0..*" -- "0..*" Creator : planned creators
+CatalogItem "1" *-- "0..1" MainImage : planned principal image
+CollectionResource "1" <-- "0..*" CollectionCopy : FK cascade on collection delete
+Location "0..1" <-- "0..*" CollectionCopy : optional FK, deletion restricted
+CollectionResource "1" *-- "1" Wishlist : logical, one per collection
+Wishlist "1" *-- "0..*" WishlistEntry : entries persisted with collectionId
+
+ItemType ..> CollectorAccount : ownerId UUID for PERSONAL, no cross-service FK
+CatalogItem ..> CollectorAccount : createdBy UUID, no cross-service FK
+CollectionResource ..> CollectorAccount : ownerId UUID from JWT, no cross-service FK
+Location ..> CollectorAccount : ownerId UUID from JWT, no cross-service FK
+CollectionCopy ..> CatalogItem : catalogItemId UUID validated by REST
+WishlistEntry ..> CatalogItem : catalogItemId UUID validated by REST
+
+note for CollectorProfile "Embedded in collector_account; no separate table"
+note for Category "Planned from requirements; not implemented"
+note for Creator "Planned from requirements; not implemented"
+note for MainImage "CatalogItem currently has imageReference; image entity/upload is planned"
+note for Wishlist "Logical list scoped to a collection; persisted through its entries"
+note for WishlistEntry "Implemented in collection-service; catalog item UUID is validated by REST"

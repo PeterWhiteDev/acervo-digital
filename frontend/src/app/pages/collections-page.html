@@ -1,0 +1,122 @@
+<section class="page-heading">
+  <div><p class="eyebrow">TU ARCHIVO PERSONAL</p><h1>Colecciones</h1><p class="subtitle">Cada colección guarda sus copias y su lista de deseos.</p></div>
+  <button type="button" class="primary-button" (click)="openCollectionEditor()"><svg [lucideIcon]="icons.LucidePlus" aria-hidden="true"></svg> Nueva colección</button>
+</section>
+
+@if (success()) { <p class="notice success" role="status">{{ success() }}</p> }
+@if (error()) { <p class="notice error" role="alert">{{ error() }}</p> }
+
+<div class="collections-layout">
+  <aside class="collection-sidebar">
+    <div class="sidebar-heading"><h2>Tus colecciones</h2><span>{{ collections().length }}</span></div>
+    @for (collection of collections(); track collection.id) {
+      <button type="button" class="collection-choice" [class.selected]="selectedCollectionId() === collection.id" (click)="selectCollection(collection.id)">
+        <span class="choice-icon"><svg [lucideIcon]="collection.visibility === 'PUBLIC' ? icons.LucideGlobe2 : icons.LucideLockKeyhole" aria-hidden="true"></svg></span>
+        <span class="choice-copy"><strong>{{ collection.name }}</strong><small>{{ collection.visibility === 'PUBLIC' ? 'Pública' : 'Privada' }}</small></span>
+        <svg class="choice-arrow" [lucideIcon]="icons.LucideChevronRight" aria-hidden="true"></svg>
+      </button>
+    } @empty {
+      <p class="empty-note">Aún no tienes colecciones. Crea una para empezar.</p>
+    }
+  </aside>
+
+  <section class="collection-content">
+    @if (selectedCollection(); as collection) {
+      <header class="collection-heading">
+        <div><p class="eyebrow">{{ collection.visibility === 'PUBLIC' ? 'VISIBLE PARA TODOS' : 'SOLO PARA TI' }}</p><h2>{{ collection.name }}</h2><p>{{ collection.description || 'Sin descripción.' }}</p></div>
+        <button class="delete-collection" type="button" title="Eliminar colección" aria-label="Eliminar colección" (click)="deleteCollection(collection)"><svg [lucideIcon]="icons.LucideTrash2" aria-hidden="true"></svg></button>
+      </header>
+      <nav class="tabs" aria-label="Contenido de la colección">
+        <button type="button" [class.active]="activeTab() === 'copies'" (click)="setTab('copies')">Ejemplares <span>{{ copies().length }}</span></button>
+        <button type="button" [class.active]="activeTab() === 'wishlist'" (click)="setTab('wishlist')">Deseos <span>{{ wishlist().length }}</span></button>
+        <button type="button" [class.active]="activeTab() === 'locations'" (click)="setTab('locations')">Ubicaciones <span>{{ locations().length }}</span></button>
+      </nav>
+
+      @if (activeTab() === 'copies') {
+        <div class="panel-toolbar"><div><h3>Ejemplares</h3><p>Copias físicas vinculadas al catálogo compartido.</p></div><button type="button" class="secondary-button" (click)="openCopyEditor()" [disabled]="catalogItems().length === 0"><svg [lucideIcon]="icons.LucidePlus" aria-hidden="true"></svg> Añadir copia</button></div>
+        <div class="entry-list">
+          @for (copy of copies(); track copy.id) {
+            <article class="entry-row">
+              <div class="entry-main"><strong>{{ copy.catalogItemTitle }}</strong><span>{{ copy.condition.replace('_', ' ') }} · {{ copy.acquiredOn }}</span></div>
+              <div class="entry-meta">{{ copy.locationId ? (locations().find(location => location.id === copy.locationId)?.name || 'Ubicación asignada') : 'Sin ubicación' }}<small>{{ copy.currentValue !== null && copy.currentValue !== undefined ? (copy.currentValue | currency:'EUR':'symbol':'1.2-2') : '' }}</small></div>
+              <div class="row-actions"><button type="button" class="text-button" (click)="openCopyEditor(copy)">Editar</button><button type="button" class="text-button danger-text" (click)="deleteCopy(copy)">Eliminar</button></div>
+            </article>
+          } @empty { <p class="empty-state">{{ loading() ? 'Cargando ejemplares…' : 'Todavía no hay ejemplares en esta colección.' }}</p> }
+        </div>
+      }
+
+      @if (activeTab() === 'wishlist') {
+        <div class="panel-toolbar"><div><h3>Lista de deseos</h3><p>Lo que te gustaría sumar a esta colección.</p></div><button type="button" class="secondary-button" (click)="openWishEditor()" [disabled]="catalogItems().length === 0"><svg [lucideIcon]="icons.LucidePlus" aria-hidden="true"></svg> Añadir deseo</button></div>
+        <div class="entry-list">
+          @for (entry of wishlist(); track entry.id) {
+            <article class="entry-row wish-row">
+              <span class="priority-mark" [class.high]="entry.priority === 'HIGH'" [class.low]="entry.priority === 'LOW'" [attr.title]="'Prioridad ' + entry.priority"><svg [lucideIcon]="icons.LucideHeart" aria-hidden="true"></svg></span>
+              <div class="entry-main"><strong>{{ entry.catalogItemTitle }}</strong><span>{{ entry.priority }}{{ entry.notes ? ' · ' + entry.notes : '' }}</span></div>
+              <div class="row-actions"><button type="button" class="text-button" (click)="openConvertEditor(entry)">Convertir</button><button type="button" class="text-button" (click)="openWishEditor(entry)">Editar</button><button type="button" class="text-button danger-text" (click)="deleteWish(entry)">Eliminar</button></div>
+            </article>
+          } @empty { <p class="empty-state">{{ loading() ? 'Cargando deseos…' : 'La lista está vacía. Añade una ficha del catálogo.' }}</p> }
+        </div>
+      }
+
+      @if (activeTab() === 'locations') {
+        <div class="panel-toolbar"><div><h3>Ubicaciones</h3><p>Espacios privados para organizar tus copias.</p></div></div>
+        <div class="location-list">
+          @for (location of locations(); track location.id) {
+            <article><span class="location-mark"><svg [lucideIcon]="icons.LucideMapPin" aria-hidden="true"></svg></span><div><strong>{{ location.name }}</strong><small>{{ location.description || 'Sin descripción' }}</small></div></article>
+          } @empty { <p class="empty-state">No has creado ubicaciones todavía.</p> }
+        </div>
+        <form class="location-form" (ngSubmit)="saveLocation()" #locationForm="ngForm">
+          <label>Nombre<input name="locationName" [(ngModel)]="locationName" required maxlength="100" placeholder="Estantería del salón" /></label>
+          <label>Descripción<input name="locationDescription" [(ngModel)]="locationDescription" maxlength="1000" placeholder="Opcional" /></label>
+          <button type="submit" class="primary-button" [disabled]="locationForm.invalid || saving()">Crear ubicación</button>
+        </form>
+      }
+    } @else {
+      <div class="no-collection"><span class="no-collection-icon"><svg [lucideIcon]="icons.LucideBoxes" aria-hidden="true"></svg></span><h2>Un espacio para cada colección.</h2><p>Crea una colección para empezar a registrar tus ejemplares y deseos.</p><button type="button" class="primary-button" (click)="openCollectionEditor()">Crear primera colección</button></div>
+    }
+  </section>
+</div>
+
+@if (editorMode()) {
+  <div class="overlay" (click)="closeEditor()">
+    <section class="editor" role="dialog" aria-modal="true" aria-labelledby="editor-title" (click)="$event.stopPropagation()">
+      <header class="editor-heading"><div><p class="eyebrow">{{ editorMode() === 'convert' ? 'DESEO ADQUIRIDO' : 'GESTIÓN DE COLECCIÓN' }}</p><h2 id="editor-title">{{ editorMode() === 'collection' ? 'Nueva colección' : editorMode() === 'copy' ? (editingCopy() ? 'Editar ejemplar' : 'Añadir ejemplar') : editorMode() === 'wish' ? (editingWish() ? 'Editar deseo' : 'Añadir a deseos') : 'Convertir en ejemplar' }}</h2></div><button type="button" class="close-button" aria-label="Cerrar" (click)="closeEditor()">×</button></header>
+
+      @if (editorMode() === 'collection') {
+        <form (ngSubmit)="saveCollection()" #collectionForm="ngForm">
+          <label>Nombre<input name="name" [(ngModel)]="collectionName" required maxlength="100" /></label>
+          <label>Descripción<textarea name="description" [(ngModel)]="collectionDescription" maxlength="1000" rows="3"></textarea></label>
+          <label>Visibilidad<select name="visibility" [(ngModel)]="visibility"><option value="PRIVATE">Privada</option><option value="PUBLIC">Pública</option></select></label>
+          <div class="form-actions"><button type="button" class="secondary-button" (click)="closeEditor()">Cancelar</button><button type="submit" class="primary-button" [disabled]="collectionForm.invalid || saving()">Crear colección</button></div>
+        </form>
+      }
+
+      @if (editorMode() === 'copy' || editorMode() === 'wish') {
+        <form (ngSubmit)="editorMode() === 'copy' ? saveCopy() : saveWish()" #entryForm="ngForm">
+          <label>Ficha del catálogo<select name="catalogItemId" [(ngModel)]="catalogItemId" required><option value="" disabled>Selecciona una ficha</option>@for (item of catalogItems(); track item.id) { <option [value]="item.id">{{ item.title }} · {{ item.itemTypeName }}</option> }</select></label>
+          @if (editorMode() === 'copy') {
+            <div class="form-grid"><label>Estado<select name="condition" [(ngModel)]="condition">@for (option of conditions; track option) { <option [value]="option">{{ option.replace('_', ' ') }}</option> }</select></label><label>Adquirido el<input name="acquiredOn" type="date" [(ngModel)]="acquiredOn" required /></label></div>
+            <label>Ubicación<select name="locationId" [(ngModel)]="locationId"><option value="">Sin ubicación</option>@for (location of locations(); track location.id) { <option [value]="location.id">{{ location.name }}</option> }</select></label>
+            <div class="form-grid"><label>Precio de compra<input name="purchasePrice" type="number" min="0" step="0.01" [(ngModel)]="purchasePrice" /></label><label>Valor actual<input name="currentValue" type="number" min="0" step="0.01" [(ngModel)]="currentValue" /></label></div>
+            <label>Notas<textarea name="notes" [(ngModel)]="notes" maxlength="2000" rows="3"></textarea></label>
+          } @else {
+            <label>Prioridad<select name="priority" [(ngModel)]="priority">@for (option of priorities; track option) { <option [value]="option">{{ option }}</option> }</select></label>
+            <label>Notas<textarea name="notes" [(ngModel)]="notes" maxlength="2000" rows="3"></textarea></label>
+          }
+          <div class="form-actions"><button type="button" class="secondary-button" (click)="closeEditor()">Cancelar</button><button type="submit" class="primary-button" [disabled]="entryForm.invalid || saving()">{{ saving() ? 'Guardando…' : editorMode() === 'copy' ? 'Guardar ejemplar' : 'Guardar deseo' }}</button></div>
+        </form>
+      }
+
+      @if (editorMode() === 'convert') {
+        <p class="conversion-title">{{ editingWish()?.catalogItemTitle }}</p>
+        <form (ngSubmit)="convertWish()" #convertForm="ngForm">
+          <div class="form-grid"><label>Estado<select name="condition" [(ngModel)]="condition">@for (option of conditions; track option) { <option [value]="option">{{ option.replace('_', ' ') }}</option> }</select></label><label>Adquirido el<input name="acquiredOn" type="date" [(ngModel)]="acquiredOn" required /></label></div>
+          <label>Ubicación<select name="locationId" [(ngModel)]="locationId"><option value="">Sin ubicación</option>@for (location of locations(); track location.id) { <option [value]="location.id">{{ location.name }}</option> }</select></label>
+          <div class="form-grid"><label>Precio de compra<input name="purchasePrice" type="number" min="0" step="0.01" [(ngModel)]="purchasePrice" /></label><label>Valor actual<input name="currentValue" type="number" min="0" step="0.01" [(ngModel)]="currentValue" /></label></div>
+          <label>Notas para la copia <span class="field-hint">Déjalo vacío para conservar las del deseo.</span><textarea name="notes" [(ngModel)]="notes" maxlength="2000" rows="3"></textarea></label>
+          <div class="form-actions"><button type="button" class="secondary-button" (click)="closeEditor()">Cancelar</button><button type="submit" class="primary-button" [disabled]="convertForm.invalid || saving()">{{ saving() ? 'Convirtiendo…' : 'Crear ejemplar' }}</button></div>
+        </form>
+      }
+    </section>
+  </div>
+}

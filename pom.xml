@@ -22,6 +22,7 @@
     <modules>
         <module>services/catalog-service</module>
         <module>services/identity-service</module>
+        <module>services/collection-service</module>
     </modules>
 
     <properties>

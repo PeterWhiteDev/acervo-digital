@@ -1,0 +1,31 @@
+spring:
+  profiles:
+    default: dev
+  application:
+    name: collection-service
+  datasource:
+    url: jdbc:h2:file:./collection-db;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8083
+
+acervo:
+  catalog:
+    base-url: ${ACERVO_CATALOG_URL:http://localhost:8081}
+  security:
+    jwt:
+      secret: ${ACERVO_JWT_SECRET}
+      issuer: acervo-identity

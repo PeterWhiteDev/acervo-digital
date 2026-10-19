@@ -1,0 +1,105 @@
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">ARCHIVO COMPARTIDO</p>
+    <h1>Catálogo</h1>
+    <p class="subtitle">Fichas comunes para todo lo que coleccionas.</p>
+  </div>
+  <button class="primary-button" type="button" (click)="openCreate()" [disabled]="types().length === 0">
+    <svg [lucideIcon]="icons.LucidePlus" aria-hidden="true"></svg> Nueva ficha
+  </button>
+</section>
+
+<section class="catalog-tools" aria-label="Filtros del catálogo">
+  <label class="search-field">
+    <svg [lucideIcon]="icons.LucideSearch" aria-hidden="true"></svg>
+    <input type="search" placeholder="Buscar en esta página" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+  </label>
+  <label class="type-filter">Tipo
+    <select [ngModel]="selectedTypeId()" (ngModelChange)="filterByType($event)">
+      <option value="">Todos los tipos</option>
+      @for (type of types(); track type.id) { <option [value]="type.id">{{ type.name }}</option> }
+    </select>
+  </label>
+  <span class="result-count">{{ totalElements() }} fichas</span>
+</section>
+
+@if (success()) { <p class="notice success" role="status">{{ success() }}</p> }
+@if (error()) { <p class="notice error" role="alert">{{ error() }}</p> }
+
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>Título</th><th>Tipo</th><th>Identificadores</th><th>Atributos</th><th><span class="visually-hidden">Acciones</span></th></tr></thead>
+    <tbody>
+      @for (item of filteredItems(); track item.id) {
+        <tr>
+          <td><strong>{{ item.title }}</strong>@if (item.description) { <span class="cell-secondary">{{ item.description }}</span> }</td>
+          <td><span class="type-label">{{ item.itemTypeName }}</span></td>
+          <td class="identifiers">{{ item.identifiers.length ? item.identifiers.map(identifierLabel).join(' · ') : '—' }}</td>
+          <td class="attributes-preview">{{ item.attributes.length ? item.attributes.slice(0, 2).map(attributeLabel).join(' · ') : '—' }}</td>
+          <td class="row-action"><button type="button" class="text-button" (click)="openEdit(item)">Editar</button></td>
+        </tr>
+      } @empty {
+        <tr><td class="empty-cell" colspan="5">{{ loading() ? 'Cargando catálogo…' : 'No hay fichas que coincidan con estos filtros.' }}</td></tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<footer class="pagination">
+  <span>Página {{ page() + 1 }} de {{ totalPages() }}</span>
+  <div>
+    <button type="button" class="secondary-button" (click)="changePage(-1)" [disabled]="page() === 0">Anterior</button>
+    <button type="button" class="secondary-button" (click)="changePage(1)" [disabled]="(page() + 1) * pageSize >= totalElements()">Siguiente</button>
+  </div>
+</footer>
+
+@if (editorOpen()) {
+  <div class="overlay" (click)="closeEditor()">
+    <section class="editor" role="dialog" aria-modal="true" aria-labelledby="editor-title" (click)="$event.stopPropagation()">
+      <header class="editor-heading">
+        <div><p class="eyebrow">{{ editingItem() ? 'ACTUALIZAR' : 'NUEVO REGISTRO' }}</p><h2 id="editor-title">{{ editingItem() ? 'Editar ficha' : 'Añadir al catálogo' }}</h2></div>
+        <button type="button" class="close-button" aria-label="Cerrar" (click)="closeEditor()">×</button>
+      </header>
+      <form (ngSubmit)="save()" #itemForm="ngForm">
+        <label>Tipo de elemento
+          <select [ngModel]="selectedTypeId()" (ngModelChange)="selectedTypeId.set($event); loadAttributes($event)" name="itemTypeId" required [disabled]="!!editingItem()">
+            @for (type of types(); track type.id) { <option [value]="type.id">{{ type.name }}</option> }
+          </select>
+        </label>
+        <label>Título
+          <input name="title" [(ngModel)]="title" required maxlength="200" />
+        </label>
+        <label>Descripción
+          <textarea name="description" [(ngModel)]="description" rows="3" maxlength="2000"></textarea>
+        </label>
+        @if (attributes().length) {
+          <div class="field-section"><h3>Datos del tipo</h3>
+            @for (attribute of attributes(); track attribute.id) {
+              <label>{{ attribute.name }}{{ attribute.required ? ' *' : '' }}
+                @if (attribute.dataType === 'BOOLEAN') {
+                  <select [name]="'attribute-' + attribute.attributeKey" [ngModel]="attributeValues()[attribute.attributeKey] ?? ''" (ngModelChange)="setAttribute(attribute.attributeKey, $event)" [required]="attribute.required"><option value="">Sin especificar</option><option value="true">Sí</option><option value="false">No</option></select>
+                } @else {
+                  <input [name]="'attribute-' + attribute.attributeKey" [type]="attribute.dataType === 'DATE' ? 'date' : attribute.dataType === 'INTEGER' || attribute.dataType === 'DECIMAL' ? 'number' : 'text'" [step]="attribute.dataType === 'DECIMAL' ? 'any' : '1'" [ngModel]="attributeValues()[attribute.attributeKey] ?? ''" (ngModelChange)="setAttribute(attribute.attributeKey, $event)" [required]="attribute.required" />
+                }
+              </label>
+            }
+          </div>
+        }
+        <div class="field-section">
+          <div class="section-title"><h3>Identificadores</h3><button type="button" class="text-button" (click)="addIdentifier()">Añadir otro</button></div>
+          @for (identifier of identifiers; track $index) {
+            <div class="identifier-row">
+              <select [name]="'scheme-' + $index" [(ngModel)]="identifier.scheme">
+                @for (scheme of identifierSchemes; track scheme) { <option [value]="scheme">{{ scheme }}</option> }
+              </select>
+              <input [name]="'identifier-' + $index" [(ngModel)]="identifier.value" maxlength="120" placeholder="Valor" />
+              <button type="button" class="remove-button" (click)="removeIdentifier($index)" [attr.aria-label]="'Quitar identificador ' + ($index + 1)">×</button>
+            </div>
+          } @empty { <p class="helper-text">Sin identificadores asociados.</p> }
+        </div>
+        @if (error()) { <p class="notice error" role="alert">{{ error() }}</p> }
+        <div class="form-actions"><button type="button" class="secondary-button" (click)="closeEditor()">Cancelar</button><button type="submit" class="primary-button" [disabled]="itemForm.invalid || saving()">{{ saving() ? 'Guardando…' : 'Guardar ficha' }}</button></div>
+      </form>
+    </section>
+  </div>
+}
