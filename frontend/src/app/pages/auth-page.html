@@ -1,15 +1,12 @@
 <main class="auth-page">
   <section class="auth-aside">
-    <a class="auth-brand" routerLink="/login">
-      <svg [lucideIcon]="icons.LucideBookOpen" aria-hidden="true"></svg>
-      <span>acervo<span>.</span></span>
-    </a>
+    <a class="auth-brand" routerLink="/login" aria-label="Acervo Digital"><app-brand /></a>
     <div class="aside-copy">
-      <p class="eyebrow">TU ARCHIVO, A TU MANERA</p>
-      <h1>Lo que guardas<br />también cuenta<br /><em>una historia.</em></h1>
-      <p class="aside-note">Un lugar para ordenar tus libros, películas y todo lo que merece quedarse.</p>
+      <p class="eyebrow">{{ copy().eyebrow }}</p>
+      <h1>{{ copy().lines[0] }}<br />{{ copy().lines[1] }}<br /><em>{{ copy().accent }}</em></h1>
+      <p class="aside-note">{{ copy().note }}</p>
     </div>
-    <div class="aside-index"><span>01</span><span class="index-rule"></span><span>COLECCIONA CON SENTIDO</span></div>
+    <div class="aside-index"><span>01</span><span class="index-rule"></span><span>{{ copy().index }}</span></div>
   </section>
 
   <section class="auth-main">

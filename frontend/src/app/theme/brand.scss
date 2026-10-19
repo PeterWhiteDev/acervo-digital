@@ -1,0 +1,17 @@
+:host { align-items: center; display: inline-flex; gap: .65rem; }
+
+.words { display: grid; gap: .1rem; line-height: 1; }
+.name { font-family: var(--display-font); font-size: 1.45rem; font-weight: 700; }
+.tag { font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; }
+
+.mark-classic { align-items: center; background: var(--signal); border-radius: 5px; color: var(--ink); display: inline-flex; height: 34px; justify-content: center; width: 34px; }
+.mark-classic svg { height: 18px; width: 18px; }
+.dot { color: var(--signal); }
+
+.mark-expedition { filter: drop-shadow(0 3px 4px rgba(0, 0, 0, .45)); height: 50px; width: 50px; }
+.mark-expedition + .words .name { color: #f3e2b5; font-size: 1.55rem; letter-spacing: .16em; text-transform: uppercase; }
+.mark-expedition + .words .tag { color: #d8aa4c; font-family: var(--mono-font); letter-spacing: .08em; text-transform: none; }
+
+.mark-neon { filter: drop-shadow(0 0 6px rgba(63, 214, 255, .7)); height: 40px; width: 40px; }
+.mark-neon + .words .name { color: #eaf7ff; font-size: 1.05rem; letter-spacing: .34em; text-shadow: 0 0 10px rgba(63, 214, 255, .6); }
+.mark-neon + .words .tag { color: var(--signal); font-family: var(--mono-font); letter-spacing: .1em; text-transform: none; }
