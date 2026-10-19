@@ -1,0 +1,2 @@
+ALTER TABLE collector_account
+    ADD COLUMN active BOOLEAN NOT NULL DEFAULT TRUE;

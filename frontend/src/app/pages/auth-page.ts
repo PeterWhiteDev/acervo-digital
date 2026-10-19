@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
@@ -37,7 +37,7 @@ const THEME_COPY = {
   styleUrl: './auth-page.scss',
   templateUrl: './auth-page.html',
 })
-export class AuthPage {
+export class AuthPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -51,10 +51,10 @@ export class AuthPage {
   protected password = '';
   protected displayName = '';
 
-  constructor() {
+  ngOnInit(): void {
     this.mode.set(this.route.snapshot.data['mode'] === 'register' ? 'register' : 'login');
     if (this.auth.isAuthenticated()) {
-      void this.router.navigate(['/catalog']);
+      void this.router.navigate(['/collections']);
     }
   }
 
@@ -64,7 +64,7 @@ export class AuthPage {
     const credentials = { email: this.email.trim(), password: this.password };
     const signIn = () => this.auth.login(credentials).subscribe({
       next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/catalog';
+        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/collections';
         void this.router.navigateByUrl(returnUrl);
       },
       error: (error: { status?: number }) => this.fail(error),
@@ -82,10 +82,15 @@ export class AuthPage {
 
   private fail(error: { status?: number }): void {
     this.loading.set(false);
-    this.error.set(error.status === 409
-      ? 'Ya existe una cuenta con ese correo.'
-      : error.status === 401
-        ? 'Correo o contraseña incorrectos.'
-        : 'No se pudo conectar con el servicio. Comprueba que los servicios estén iniciados.');
+    switch (error.status) {
+      case 409:
+        this.error.set('Ya existe una cuenta con ese correo.');
+        break;
+      case 401:
+        this.error.set('Correo o contraseña incorrectos.');
+        break;
+      default:
+        this.error.set('No se pudo conectar con el servicio. Comprueba que los servicios estén iniciados.');
+    }
   }
 }

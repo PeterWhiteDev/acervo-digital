@@ -20,6 +20,10 @@ public class CollectorProfile {
         return new CollectorProfile(displayName);
     }
 
+    void updateDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
     public String getDisplayName() {
         return displayName;
     }
