@@ -73,11 +73,11 @@ El frontend integra registro/login JWT, rutas protegidas, catálogo paginado, ed
 
 **Criterio de aceptación:** los flujos principales del MVP se pueden completar desde la interfaz usando la API, con validaciones y errores comprensibles.
 
-### Mejora posterior a `0.6.0` — Temas de interfaz: en curso
+### `0.6.1` — Temas de interfaz: en preparación
 
 - Selector fijo en todas las pantallas con tres estilos guardados en el navegador: Clásico, Expedición y Neón.
 - Cada tema cambia colores, tipografías, logo, fondo y la ubicación de navegación, filtros y listas.
-- Desarrollado en `feature/ui-themes`; build y pruebas del frontend correctos. Pendiente revisión visual e integración en `develop`.
+- Integrado en `develop` mediante la PR #10. Versión Maven `0.6.1` preparada; pendiente `clean install` en STS, PR de `develop` a `master` y tag `v0.6.1`.
 
 ### `1.0.0` — MVP completo y estable
 
