@@ -14,7 +14,7 @@ La fuente Mermaid editable del diagrama de clases del dominio está en [`docs/mo
 
 La guía breve para instalar requisitos y ejecutar los servicios está en [`docs/instalacion-y-ejecucion.md`](docs/instalacion-y-ejecucion.md).
 
-El backend usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La interfaz usa Angular 22 y Node.js 26. Cada servicio mantiene su propia base H2 local. La última release publicada es `v0.3.0`; `0.5.0` y `0.6.0` están en desarrollo.
+El backend usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La interfaz usa Angular 22 y Node.js 26. Cada servicio mantiene su propia base H2 local. La última release publicada es `v0.6.0`; `1.0.0` será la primera versión estable.
 
 ## Identidad y autenticación
 
@@ -47,6 +47,8 @@ npm start
 El servidor local escucha en `http://localhost:4200` y usa `proxy.conf.json` para dirigir autenticación, catálogo y colecciones a sus respectivos servicios. La sesión requiere iniciar sesión o registrarse. El JWT se añade automáticamente a las operaciones protegidas.
 
 La interfaz permite consultar y crear/editar fichas, filtrar el catálogo por tipo, crear tipos personales y atributos, administrar colecciones y ubicaciones, y gestionar copias y deseos, incluida su conversión a ejemplar.
+
+El selector fijo **Estilo** cambia entre tres interfaces y recuerda la elección en el navegador: **Clásico**, **Expedición** (bitácora lateral, mapas y fichas de campo) y **Neón** (HUD, dock inferior y paneles de ciencia ficción).
 
 ## Tipos de elemento
 

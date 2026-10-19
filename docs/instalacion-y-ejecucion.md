@@ -54,4 +54,6 @@ Abre `http://localhost:4200`. El proxy de Angular envía las peticiones a los pu
 
 Regístrate desde la pantalla inicial e inicia sesión. Después puedes crear o editar fichas, crear tipos personales y atributos, crear una colección, añadir deseos y convertir un deseo en ejemplar. Las bases H2 locales conservan los datos entre ejecuciones.
 
+Con el selector **Estilo**, visible en todas las pantallas, puedes cambiar entre las interfaces Clásico, Expedición y Neón. La elección se recuerda en el navegador.
+
 Para validar el backend antes de la demo, ejecuta `clean test` desde el proyecto raíz en STS. No se necesita Bruno para arrancar la interfaz.

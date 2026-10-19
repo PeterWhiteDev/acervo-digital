@@ -17,7 +17,7 @@ h1 { font-family: var(--display-font); font-size: clamp(2.4rem, 5vw, 3.6rem); fo
 .type-filter { color: var(--muted); display: grid; font-size: .72rem; font-weight: 700; gap: .3rem; min-width: 190px; }
 .type-filter select, select, textarea, .editor input { background: white; border: 1px solid var(--line); border-radius: 4px; color: var(--ink); min-height: 42px; padding: .6rem .7rem; }
 .result-count { color: var(--muted); font-size: .78rem; margin-left: auto; padding-bottom: .7rem; white-space: nowrap; }
-.table-wrap { overflow-x: auto; }
+.table-wrap { overflow-x: auto; position: relative; }
 table { border-collapse: collapse; min-width: 760px; width: 100%; }
 th { color: var(--muted); font-size: .67rem; font-weight: 700; letter-spacing: .08em; padding: .8rem 1rem; text-align: left; text-transform: uppercase; }
 td { border-top: 1px solid var(--line); font-size: .88rem; padding: 1rem; vertical-align: middle; }

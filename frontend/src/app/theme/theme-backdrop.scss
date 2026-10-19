@@ -1,0 +1,49 @@
+:host { inset: 0; pointer-events: none; position: fixed; z-index: 0; }
+.scene { height: 100%; overflow: hidden; position: relative; width: 100%; }
+
+.expedition .contours { height: 100%; opacity: .16; position: absolute; width: 100%; }
+.expedition .route { height: 100%; inset: 0; opacity: .22; position: absolute; width: 100%; }
+.expedition .compass { bottom: -90px; height: 420px; opacity: .13; position: absolute; right: -70px; transform: rotate(-12deg); width: 420px; }
+.expedition .submarine { animation: drift 38s ease-in-out infinite alternate; opacity: .1; position: absolute; right: 18%; top: 14%; width: 240px; }
+
+.neon .glow { border-radius: 50%; filter: blur(70px); position: absolute; }
+.neon .glow-a { background: rgba(255, 110, 30, .28); height: 420px; left: -120px; top: 12%; width: 420px; }
+.neon .glow-b { background: rgba(40, 170, 255, .24); height: 520px; right: -160px; top: -120px; width: 520px; }
+.neon .skyline { bottom: 18vh; height: 30vh; left: 0; opacity: .9; position: absolute; width: 100%; }
+.neon .floor {
+  background:
+    linear-gradient(rgba(63, 214, 255, .28) 1px, transparent 1px) 0 0 / 100% 36px,
+    linear-gradient(90deg, rgba(63, 214, 255, .22) 1px, transparent 1px) 0 0 / 60px 100%;
+  bottom: -10vh;
+  height: 32vh;
+  left: -25%;
+  mask-image: linear-gradient(to top, #000 10%, transparent 95%);
+  position: absolute;
+  transform: perspective(380px) rotateX(62deg);
+  width: 150%;
+}
+.neon .rain {
+  animation: rain .9s linear infinite;
+  background: repeating-linear-gradient(104deg, transparent 0 22px, rgba(160, 210, 255, .07) 22px 23px, transparent 23px 47px);
+  inset: -60px 0 0;
+  position: absolute;
+}
+.neon .scanlines { background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px); inset: 0; position: absolute; }
+.neon .sweep {
+  animation: sweep 9s linear infinite;
+  background: linear-gradient(180deg, transparent, rgba(63, 214, 255, .07), transparent);
+  height: 140px;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: -140px;
+}
+
+@keyframes drift { from { transform: translateX(0) translateY(0); } to { transform: translateX(-160px) translateY(24px); } }
+@keyframes rain { from { transform: translateY(0); } to { transform: translateY(60px); } }
+@keyframes sweep { to { transform: translateY(calc(100vh + 140px)); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .expedition .submarine, .neon .rain, .neon .sweep { animation: none; }
+  .neon .sweep { display: none; }
+}

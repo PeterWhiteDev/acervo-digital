@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-- Última versión publicada: `v0.3.0`.
+- Última versión publicada: `v0.6.0`.
 - Rama principal: `master`.
 - Stack actual: Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway.
 - Interfaz Angular 22 en desarrollo; PostgreSQL queda para el hito `1.0.0`.
@@ -41,7 +41,7 @@ El flujo de registro/login, JWT HS256 y autorización del catálogo está public
 
 **Criterio de aceptación:** usuarios distintos no pueden consultar ni modificar recursos personales ajenos; los permisos administrativos se verifican mediante pruebas.
 
-### `0.4.0` — Colecciones y ejemplares: completado funcionalmente; publicación pendiente
+### `0.4.0` — Colecciones y ejemplares: incluido en `v0.6.0`
 
 - Crear `collection-service`.
 - Permitir varias colecciones por coleccionista y establecer visibilidad `PRIVATE` o `PUBLIC`.
@@ -53,25 +53,31 @@ El módulo `collection-service` ya tiene CRUD JWT de colecciones, ubicaciones y 
 
 **Criterio de aceptación:** un usuario puede organizar varios ejemplares en colecciones distintas, incluso si comparten ficha de catálogo; la privacidad se respeta.
 
-### `0.5.0` — Lista de deseos: en curso
+### `0.5.0` — Lista de deseos: incluido en `v0.6.0`
 
 - Añadir una lista de deseos por colección.
 - Guardar prioridad y notas opcionales.
 - Convertir un deseo adquirido en ejemplar mediante una operación transaccional.
 
-El CRUD de deseos y la conversión transaccional están implementados. Se solicita condición y fecha de adquisición; ubicación y precios son opcionales, y las notas del deseo se conservan si la conversión no envía otras. El usuario ejecutará `clean test` en STS; la validación manual desde Bruno queda aplazada.
+El CRUD de deseos y la conversión transaccional están implementados. Se solicita condición y fecha de adquisición; ubicación y precios son opcionales, y las notas del deseo se conservan si la conversión no envía otras. Se incluyó en `v0.6.0`; la validación manual desde Bruno quedó aplazada.
 
 **Criterio de aceptación:** la conversión crea el ejemplar y elimina el deseo, o no aplica ninguno de los dos cambios si falla la operación.
 
-### `0.6.0` — Interfaz Angular 22: en curso
+### `0.6.0` — Interfaz Angular 22: publicada
 
 - Crear el frontend Angular 22, compatible con Node.js 26 del entorno local.
 - Consultar el catálogo y gestionar tipos, atributos, colecciones, ejemplares y deseos.
 - Integrar autenticación y autorización con la API.
 
-El frontend ya integra registro/login JWT, rutas protegidas, catálogo paginado, edición de fichas con atributos/identificadores, tipos personales, atributos, colecciones, copias, ubicaciones y deseos. El proxy local enruta las peticiones a los tres servicios. `npm run build` termina correctamente; falta validar la ejecución contra los servicios locales.
+El frontend integra registro/login JWT, rutas protegidas, catálogo paginado, edición de fichas con atributos/identificadores, tipos personales, atributos, colecciones, copias, ubicaciones y deseos. El proxy local enruta las peticiones a los tres servicios. La versión Maven `0.6.0` está publicada. Backend `clean install` y build/tests del frontend pasaron; la validación manual de extremo a extremo queda aplazada.
 
 **Criterio de aceptación:** los flujos principales del MVP se pueden completar desde la interfaz usando la API, con validaciones y errores comprensibles.
+
+### `0.6.1` — Temas de interfaz: en preparación
+
+- Selector fijo en todas las pantallas con tres estilos guardados en el navegador: Clásico, Expedición y Neón.
+- Cada tema cambia colores, tipografías, logo, fondo y la ubicación de navegación, filtros y listas.
+- Integrado en `develop` mediante la PR #10. Versión Maven `0.6.1` preparada; pendiente `clean install` en STS, PR de `develop` a `master` y tag `v0.6.1`.
 
 ### `1.0.0` — MVP completo y estable
 
