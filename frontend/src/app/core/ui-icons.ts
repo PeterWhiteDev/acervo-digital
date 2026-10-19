@@ -1,0 +1,33 @@
+import {
+  LucideArrowRight,
+  LucideBookOpen,
+  LucideBoxes,
+  LucideChevronRight,
+  LucideGlobe2,
+  LucideHeart,
+  LucideLibrary,
+  LucideLockKeyhole,
+  LucideLogOut,
+  LucideMapPin,
+  LucidePlus,
+  LucideSearch,
+  LucideSlidersHorizontal,
+  LucideTrash2,
+} from '@lucide/angular';
+
+export const uiIcons = {
+  LucideArrowRight,
+  LucideBookOpen,
+  LucideBoxes,
+  LucideChevronRight,
+  LucideGlobe2,
+  LucideHeart,
+  LucideLibrary,
+  LucideLockKeyhole,
+  LucideLogOut,
+  LucideMapPin,
+  LucidePlus,
+  LucideSearch,
+  LucideSlidersHorizontal,
+  LucideTrash2,
+};

@@ -1,0 +1,944 @@
+# yaml-language-server: $schema=https://spec.openapis.org/oas/3.0/schema/2021-09-28
+openapi: 3.0.3
+info:
+  title: Acervo Digital - Collection Service
+  version: 0.5.0
+  description: API para administrar colecciones, ubicaciones, copias y listas de deseos.
+servers:
+  - url: http://localhost:8083
+    description: Entorno local de desarrollo
+security:
+  - BearerAuth: []
+tags:
+  - name: Colecciones privadas
+  - name: Colecciones públicas
+  - name: Ubicaciones
+  - name: Copias privadas
+  - name: Copias públicas
+  - name: Listas de deseos
+paths:
+  /api/v1/collections/{collectionId}/wishlist:
+    parameters:
+      - $ref: '#/components/parameters/CollectionIdPath'
+    get:
+      tags:
+        - Listas de deseos
+      operationId: listWishlistEntries
+      summary: Lista los deseos de una colección propia o administrada
+      responses:
+        '200':
+          description: Deseos ordenados por fecha de creación descendente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WishlistEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+    post:
+      tags:
+        - Listas de deseos
+      operationId: createWishlistEntry
+      summary: Añade una ficha existente del catálogo a la lista de deseos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistEntryRequest'
+      responses:
+        '201':
+          description: Deseo creado
+          headers:
+            Location:
+              description: URI del deseo creado
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+
+  /api/v1/collections/{collectionId}/wishlist/{entryId}:
+    parameters:
+      - $ref: '#/components/parameters/CollectionIdPath'
+      - $ref: '#/components/parameters/WishlistEntryId'
+    get:
+      tags:
+        - Listas de deseos
+      operationId: getWishlistEntry
+      summary: Consulta un deseo propio o administrado
+      responses:
+        '200':
+          description: Deseo encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistEntry'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+    put:
+      tags:
+        - Listas de deseos
+      operationId: updateWishlistEntry
+      summary: Reemplaza la ficha, prioridad y notas de un deseo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WishlistEntryRequest'
+      responses:
+        '200':
+          description: Deseo actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WishlistEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+    delete:
+      tags:
+        - Listas de deseos
+      operationId: deleteWishlistEntry
+      summary: Elimina un deseo propio o administrado
+      responses:
+        '204':
+          description: Deseo eliminado
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/collections/{collectionId}/wishlist/{entryId}/convert:
+    post:
+      tags:
+        - Listas de deseos
+      operationId: convertWishlistEntry
+      summary: Convierte un deseo en una copia de la colección
+      description: Crea la copia y elimina el deseo en una transacción. Si notes se omite, se conservan las notas del deseo.
+      parameters:
+        - $ref: '#/components/parameters/CollectionIdPath'
+        - $ref: '#/components/parameters/WishlistEntryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConvertWishlistEntryRequest'
+      responses:
+        '201':
+          description: Copia creada y deseo eliminado
+          headers:
+            Location:
+              description: URI de la copia creada
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionCopy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+
+  /api/v1/collections/{collectionId}/copies:
+    parameters:
+      - $ref: '#/components/parameters/CollectionIdPath'
+    get:
+      tags:
+        - Copias privadas
+      operationId: listOwnedCollectionCopies
+      summary: Lista las copias de una colección propia o administrada
+      responses:
+        '200':
+          description: Copias con sus datos privados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CollectionCopy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+    post:
+      tags:
+        - Copias privadas
+      operationId: createCollectionCopy
+      summary: Registra una copia de una ficha existente del catálogo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionCopyRequest'
+      responses:
+        '201':
+          description: Copia creada
+          headers:
+            Location:
+              description: URI de la copia creada
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionCopy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+
+  /api/v1/collections/{collectionId}/copies/{copyId}:
+    parameters:
+      - $ref: '#/components/parameters/CollectionIdPath'
+      - $ref: '#/components/parameters/CopyId'
+    get:
+      tags:
+        - Copias privadas
+      operationId: getOwnedCollectionCopy
+      summary: Consulta una copia propia o administrada
+      responses:
+        '200':
+          description: Copia encontrada con datos privados
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionCopy'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+    put:
+      tags:
+        - Copias privadas
+      operationId: updateCollectionCopy
+      summary: Reemplaza los datos de una copia propia o administrada
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionCopyRequest'
+      responses:
+        '200':
+          description: Copia actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CollectionCopy'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+    delete:
+      tags:
+        - Copias privadas
+      operationId: deleteCollectionCopy
+      summary: Elimina una copia propia o administrada
+      responses:
+        '204':
+          description: Copia eliminada
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/public/collections/{collectionId}/copies:
+    get:
+      tags:
+        - Copias públicas
+      operationId: listPublicCollectionCopies
+      summary: Lista título y estado de copias de una colección pública
+      description: Nunca incluye ubicaciones, fechas de adquisición, precios ni notas.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CollectionIdPath'
+      responses:
+        '200':
+          description: Resumen público de las copias
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PublicCollectionCopy'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '503':
+          description: El servicio de catálogo no está disponible
+
+  /api/v1/locations:
+    get:
+      tags:
+        - Ubicaciones
+      operationId: listOwnedLocations
+      summary: Lista las ubicaciones propias ordenadas por nombre
+      description: También para ADMIN, el listado incluye solo sus ubicaciones propias.
+      responses:
+        '200':
+          description: Ubicaciones del coleccionista autenticado
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Ubicaciones
+      operationId: createLocation
+      summary: Crea una ubicación privada para el coleccionista autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLocationRequest'
+      responses:
+        '201':
+          description: Ubicación creada
+          headers:
+            Location:
+              description: URI de la ubicación creada
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/locations/{id}:
+    parameters:
+      - $ref: '#/components/parameters/LocationId'
+    get:
+      tags:
+        - Ubicaciones
+      operationId: getOwnedLocation
+      summary: Consulta una ubicación propia o como ADMIN
+      responses:
+        '200':
+          description: Ubicación encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Ubicaciones
+      operationId: updateLocation
+      summary: Reemplaza los datos de una ubicación propia o como ADMIN
+      description: Omitir description o enviarla vacía la elimina. El propietario no cambia.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLocationRequest'
+      responses:
+        '200':
+          description: Ubicación actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Ubicaciones
+      operationId: deleteLocation
+      summary: Elimina una ubicación propia o como ADMIN
+      description: Devuelve conflicto si hay copias que todavía usan la ubicación.
+      responses:
+        '204':
+          description: Ubicación eliminada
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: La ubicación está asignada a una o más copias
+
+  /api/v1/collections:
+    get:
+      tags:
+        - Colecciones privadas
+      operationId: listOwnedCollections
+      summary: Lista las colecciones del coleccionista autenticado
+      responses:
+        '200':
+          description: Colecciones propias ordenadas por fecha de creación descendente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Collection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      tags:
+        - Colecciones privadas
+      operationId: createCollection
+      summary: Crea una colección para el coleccionista autenticado
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionRequest'
+      responses:
+        '201':
+          description: Colección creada
+          headers:
+            Location:
+              description: URI de la colección creada
+              schema:
+                type: string
+                format: uri-reference
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/collections/{id}:
+    get:
+      tags:
+        - Colecciones privadas
+      operationId: getOwnedCollection
+      summary: Consulta una colección propia o una colección como administrador
+      parameters:
+        - $ref: '#/components/parameters/CollectionId'
+      responses:
+        '200':
+          description: Colección encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+        - Colecciones privadas
+      operationId: updateCollection
+      summary: Reemplaza los datos de una colección propia o administrada
+      parameters:
+        - $ref: '#/components/parameters/CollectionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCollectionRequest'
+      responses:
+        '200':
+          description: Colección actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Colecciones privadas
+      operationId: deleteCollection
+      summary: Elimina una colección propia o administrada
+      description: También elimina las copias pertenecientes a la colección.
+      parameters:
+        - $ref: '#/components/parameters/CollectionId'
+      responses:
+        '204':
+          description: Colección eliminada
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/public/collections:
+    get:
+      tags:
+        - Colecciones públicas
+      operationId: listPublicCollections
+      summary: Lista colecciones con visibilidad PUBLIC
+      security: []
+      responses:
+        '200':
+          description: Colecciones públicas ordenadas por fecha de creación descendente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Collection'
+
+  /api/v1/public/collections/{id}:
+    get:
+      tags:
+        - Colecciones públicas
+      operationId: getPublicCollection
+      summary: Consulta una colección pública
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/CollectionId'
+      responses:
+        '200':
+          description: Colección pública encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    CollectionIdPath:
+      name: collectionId
+      in: path
+      required: true
+      description: UUID de la colección
+      schema:
+        type: string
+        format: uuid
+    CopyId:
+      name: copyId
+      in: path
+      required: true
+      description: UUID de la copia
+      schema:
+        type: string
+        format: uuid
+    WishlistEntryId:
+      name: entryId
+      in: path
+      required: true
+      description: UUID del deseo
+      schema:
+        type: string
+        format: uuid
+    LocationId:
+      name: id
+      in: path
+      required: true
+      description: UUID de la ubicación
+      schema:
+        type: string
+        format: uuid
+    CollectionId:
+      name: id
+      in: path
+      required: true
+      description: UUID de la colección
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: La petición no supera la validación
+    Unauthorized:
+      description: Falta un bearer token válido o ha expirado
+    Forbidden:
+      description: El recurso pertenece a otro coleccionista y no se dispone del rol ADMIN
+    NotFound:
+      description: Recurso inexistente o colección no pública en una consulta pública
+  schemas:
+    CreateLocationRequest:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Nombre obligatorio, no puede contener solo espacios. Se recortan los espacios extremos.
+          example: Estantería del salón
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+          description: Se recortan los espacios extremos; vacío o solo espacios se almacena como null.
+          example: Balda superior
+    UpdateLocationRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateLocationRequest'
+    Location:
+      type: object
+      required:
+        - id
+        - name
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CollectionVisibility:
+      type: string
+      enum:
+        - PRIVATE
+        - PUBLIC
+    CreateCollectionRequest:
+      type: object
+      required:
+        - name
+        - visibility
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+          maxLength: 1000
+        visibility:
+          $ref: '#/components/schemas/CollectionVisibility'
+    UpdateCollectionRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateCollectionRequest'
+    Collection:
+      type: object
+      required:
+        - id
+        - name
+        - visibility
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        visibility:
+          $ref: '#/components/schemas/CollectionVisibility'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CollectionCopyRequest:
+      type: object
+      required:
+        - catalogItemId
+        - condition
+        - acquiredOn
+      properties:
+        catalogItemId:
+          type: string
+          format: uuid
+          description: UUID de una ficha existente en catalog-service
+        condition:
+          $ref: '#/components/schemas/CopyCondition'
+        locationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Ubicación propia opcional
+        acquiredOn:
+          type: string
+          format: date
+        purchasePrice:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          nullable: true
+          description: Precio de compra en euros
+        currentValue:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          nullable: true
+          description: Valor actual en euros
+        notes:
+          type: string
+          maxLength: 2000
+          nullable: true
+    WishlistPriority:
+      type: string
+      enum:
+        - LOW
+        - MEDIUM
+        - HIGH
+    WishlistEntryRequest:
+      type: object
+      required:
+        - catalogItemId
+        - priority
+      properties:
+        catalogItemId:
+          type: string
+          format: uuid
+          description: UUID de una ficha existente en catalog-service
+        priority:
+          $ref: '#/components/schemas/WishlistPriority'
+        notes:
+          type: string
+          maxLength: 2000
+          nullable: true
+    ConvertWishlistEntryRequest:
+      type: object
+      required:
+        - condition
+        - acquiredOn
+      properties:
+        condition:
+          $ref: '#/components/schemas/CopyCondition'
+        locationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Ubicación propia opcional
+        acquiredOn:
+          type: string
+          format: date
+        purchasePrice:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          nullable: true
+        currentValue:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          nullable: true
+        notes:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Si se omite, se conservan las notas del deseo.
+    WishlistEntry:
+      type: object
+      required:
+        - id
+        - catalogItemId
+        - catalogItemTitle
+        - priority
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        catalogItemId:
+          type: string
+          format: uuid
+        catalogItemTitle:
+          type: string
+          maxLength: 200
+        priority:
+          $ref: '#/components/schemas/WishlistPriority'
+        notes:
+          type: string
+          nullable: true
+          maxLength: 2000
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CopyCondition:
+      type: string
+      enum:
+        - NEW
+        - LIKE_NEW
+        - GOOD
+        - ACCEPTABLE
+        - POOR
+    CollectionCopy:
+      allOf:
+        - $ref: '#/components/schemas/CollectionCopySummary'
+        - type: object
+          required:
+            - acquiredOn
+            - createdAt
+            - updatedAt
+          properties:
+            locationId:
+              type: string
+              format: uuid
+              nullable: true
+            acquiredOn:
+              type: string
+              format: date
+            purchasePrice:
+              type: number
+              minimum: 0
+              multipleOf: 0.01
+              nullable: true
+            currentValue:
+              type: number
+              minimum: 0
+              multipleOf: 0.01
+              nullable: true
+            notes:
+              type: string
+              nullable: true
+              maxLength: 2000
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    CollectionCopySummary:
+      type: object
+      required:
+        - id
+        - catalogItemId
+        - catalogItemTitle
+        - condition
+      properties:
+        id:
+          type: string
+          format: uuid
+        catalogItemId:
+          type: string
+          format: uuid
+        catalogItemTitle:
+          type: string
+          maxLength: 200
+        condition:
+          $ref: '#/components/schemas/CopyCondition'
+    PublicCollectionCopy:
+      allOf:
+        - $ref: '#/components/schemas/CollectionCopySummary'

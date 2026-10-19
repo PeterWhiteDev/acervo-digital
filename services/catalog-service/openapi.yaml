@@ -4,8 +4,8 @@ info:
   title: Acervo Digital - Catalog Service
   version: 0.3.0
   description: >-
-    Contrato HTTP del servicio de catálogo. Describe las operaciones implementadas
-    en la API v1, protegidas con JWT HS256 emitidos por identity-service.
+    Contrato HTTP del servicio de catálogo. Las operaciones de gestión requieren
+    JWT HS256; la ruta pública de referencia expone únicamente ID y título.
 servers:
   - url: http://localhost:8081
     description: Entorno local de desarrollo
@@ -15,7 +15,30 @@ tags:
   - name: Tipos de elemento
   - name: Definiciones de atributos
   - name: Elementos del catálogo
+  - name: Consulta pública del catálogo
 paths:
+  /api/v1/public/items/{id}:
+    get:
+      tags:
+        - Consulta pública del catálogo
+      operationId: getPublicCatalogItemSummary
+      summary: Consulta el ID y el título de una ficha
+      description: Ruta anónima mínima para representar fichas en colecciones públicas.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/UuidPathId'
+      responses:
+        '200':
+          description: Resumen público de la ficha
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicCatalogItemSummary'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
   /api/v1/item-types:
     get:
       tags:
@@ -376,6 +399,18 @@ components:
     Unauthorized:
       description: Falta un bearer token válido o ha expirado
   schemas:
+    PublicCatalogItemSummary:
+      type: object
+      required:
+        - id
+        - title
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          maxLength: 200
     ItemType:
       type: object
       required:

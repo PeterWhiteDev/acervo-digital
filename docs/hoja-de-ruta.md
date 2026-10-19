@@ -2,10 +2,10 @@
 
 ## Estado actual
 
-- Última versión publicada: `v0.2.0`.
+- Última versión publicada: `v0.3.0`.
 - Rama principal: `master`.
 - Stack actual: Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway.
-- Interfaz Angular y PostgreSQL quedan para hitos posteriores.
+- Interfaz Angular 22 en desarrollo; PostgreSQL queda para el hito `1.0.0`.
 - El usuario ejecuta Maven y las pruebas desde Eclipse STS. Los cambios de Git se gestionan desde SourceTree/STS.
 
 La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará para la primera versión completa, integrada y estable.
@@ -30,18 +30,18 @@ La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará p
 
 La implementación está publicada y validada con pruebas y Bruno. La protección de borrado se traslada a `0.4.0`, cuando exista `collection-service` y puedan comprobarse referencias reales.
 
-### `0.3.0` — Usuarios y seguridad: validado, pendiente de publicación
+### `0.3.0` — Usuarios y seguridad: completado
 
 - Incorporar usuarios y perfiles reales de coleccionista.
 - Añadir roles `USER` y `ADMIN` y autenticación/autorización con JWT.
 - Sustituir `DevelopmentCollectorProvider` por el usuario autenticado.
 - Restringir tipos personales a su propietario y permitir la administración de plantillas globales solo a administradores.
 
-El flujo inicial de registro/login, JWT HS256 y autorización del catálogo está integrado en `develop` y validado con 20 pruebas y Bruno. La publicación `v0.3.0` está en preparación.
+El flujo de registro/login, JWT HS256 y autorización del catálogo está publicado y validado con 20 pruebas y Bruno.
 
 **Criterio de aceptación:** usuarios distintos no pueden consultar ni modificar recursos personales ajenos; los permisos administrativos se verifican mediante pruebas.
 
-### `0.4.0` — Colecciones y ejemplares: siguiente hito
+### `0.4.0` — Colecciones y ejemplares: completado funcionalmente; publicación pendiente
 
 - Crear `collection-service`.
 - Permitir varias colecciones por coleccionista y establecer visibilidad `PRIVATE` o `PUBLIC`.
@@ -49,21 +49,27 @@ El flujo inicial de registro/login, JWT HS256 y autorización del catálogo est�
 - Proteger el borrado de fichas del catálogo que estén referenciadas por ejemplares o listas de deseos.
 - Guardar estado, ubicación, fecha de adquisición, precio de compra, valor actual en euros y notas.
 
+El módulo `collection-service` ya tiene CRUD JWT de colecciones, ubicaciones y copias. Las copias validan fichas mediante consulta al catálogo con timeout, admiten ubicación propia y su vista pública expone únicamente título y estado. Flyway V3 elimina copias al borrar una colección y protege ubicaciones asignadas. El usuario confirmó `BUILD SUCCESS` con 38 pruebas (18 catálogo, 3 identidad y 17 colección) y que todas las pruebas manuales de Bruno fueron bien, incluidas edición, privacidad pública y reglas de borrado.
+
 **Criterio de aceptación:** un usuario puede organizar varios ejemplares en colecciones distintas, incluso si comparten ficha de catálogo; la privacidad se respeta.
 
-### `0.5.0` — Lista de deseos
+### `0.5.0` — Lista de deseos: en curso
 
 - Añadir una lista de deseos por colección.
 - Guardar prioridad y notas opcionales.
 - Convertir un deseo adquirido en ejemplar mediante una operación transaccional.
 
+El CRUD de deseos y la conversión transaccional están implementados. Se solicita condición y fecha de adquisición; ubicación y precios son opcionales, y las notas del deseo se conservan si la conversión no envía otras. El usuario ejecutará `clean test` en STS; la validación manual desde Bruno queda aplazada.
+
 **Criterio de aceptación:** la conversión crea el ejemplar y elimina el deseo, o no aplica ninguno de los dos cambios si falla la operación.
 
-### `0.6.0` — Interfaz Angular
+### `0.6.0` — Interfaz Angular 22: en curso
 
-- Crear el frontend Angular 17.
+- Crear el frontend Angular 22, compatible con Node.js 26 del entorno local.
 - Consultar el catálogo y gestionar tipos, atributos, colecciones, ejemplares y deseos.
 - Integrar autenticación y autorización con la API.
+
+El frontend ya integra registro/login JWT, rutas protegidas, catálogo paginado, edición de fichas con atributos/identificadores, tipos personales, atributos, colecciones, copias, ubicaciones y deseos. El proxy local enruta las peticiones a los tres servicios. `npm run build` termina correctamente; falta validar la ejecución contra los servicios locales.
 
 **Criterio de aceptación:** los flujos principales del MVP se pueden completar desde la interfaz usando la API, con validaciones y errores comprensibles.
 
@@ -89,3 +95,5 @@ Cada día que se trabaje en el proyecto se crea un archivo nuevo en `docs` con e
 
 - [Seguimiento del 2026-10-13](2026-10-13.md)
 - [Seguimiento del 2026-10-14](2026-10-14.md)
+- [Seguimiento del 2026-10-19](2026-10-19.md)
+- [Instalación y ejecución](instalacion-y-ejecucion.md)
