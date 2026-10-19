@@ -13,7 +13,7 @@
 
     <groupId>com.acervodigital</groupId>
     <artifactId>acervo-digital-parent</artifactId>
-    <version>0.3.0</version>
+    <version>0.6.0</version>
     <packaging>pom</packaging>
 
     <name>Acervo Digital</name>
