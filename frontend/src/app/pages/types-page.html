@@ -24,7 +24,7 @@
       <div class="definitions">
         <div class="definition-head"><span>Nombre</span><span>Clave</span><span>Tipo de dato</span><span>Obligatorio</span></div>
         @for (attribute of attributes(); track attribute.id) {
-          <div class="definition-row"><strong>{{ attribute.name }}</strong><code>{{ attribute.attributeKey }}</code><span>{{ attribute.dataType }}</span><span>{{ attribute.required ? 'Sí' : 'No' }}</span></div>
+          <div class="definition-row"><strong>{{ attribute.name }}</strong><code>{{ attribute.attributeKey }}</code><span>{{ dataTypeLabel(attribute.dataType) }}</span><span>{{ attribute.required ? 'Sí' : 'No' }}</span></div>
         } @empty {
           <p class="empty-note">{{ loading() ? 'Cargando atributos…' : 'Este tipo todavía no tiene atributos.' }}</p>
         }

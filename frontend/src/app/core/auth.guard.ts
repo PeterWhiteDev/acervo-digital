@@ -9,3 +9,10 @@ export const authGuard: CanActivateFn = (_route, state) => {
 
   return inject(Router).createUrlTree(['/login'], { queryParams: { returnUrl: state.url } });
 };
+
+export const adminGuard: CanActivateFn = () => {
+  if (inject(AuthService).isAdmin()) {
+    return true;
+  }
+  return inject(Router).createUrlTree(['/collections']);
+};

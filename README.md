@@ -14,7 +14,7 @@ La fuente Mermaid editable del diagrama de clases del dominio está en [`docs/mo
 
 La guía breve para instalar requisitos y ejecutar los servicios está en [`docs/instalacion-y-ejecucion.md`](docs/instalacion-y-ejecucion.md).
 
-El backend usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La interfaz usa Angular 22 y Node.js 26. Cada servicio mantiene su propia base H2 local. La última release publicada es `v0.6.0`; `1.0.0` será la primera versión estable.
+El backend usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La interfaz usa Angular 22 y Node.js 26. Cada servicio mantiene su propia base H2 local. La última release publicada es `v0.6.1`; la administración de cuentas `0.7.0` está implementada, validada e integrada en `develop` mediante la PR #12, pendiente de publicación. `1.0.0` será la primera versión estable. El estado y los pendientes se detallan en [`docs/hoja-de-ruta.md`](docs/hoja-de-ruta.md).
 
 ## Identidad y autenticación
 
@@ -22,6 +22,7 @@ El servicio de identidad escucha en el puerto `8082` y ofrece:
 
 - `POST /api/v1/auth/register`: crea una cuenta con perfil básico y rol `USER`.
 - `POST /api/v1/auth/token`: valida email y contraseña y devuelve un JWT HS256 válido durante 15 minutos.
+- `/api/v1/admin/users`: administración de cuentas con bearer JWT `ADMIN`; lista cuentas sin credenciales, crea `USER`, edita email/nombre/rol/estado, restablece contraseña y desactiva cuentas ajenas.
 
 Las rutas de gestión del catálogo requieren `Authorization: Bearer <accessToken>`. La única lectura anónima nueva devuelve solo UUID y título de una ficha. En desarrollo ambos servicios usan el mismo secreto local de práctica; puede sustituirse mediante `ACERVO_JWT_SECRET`. No uses el valor local fuera de desarrollo.
 
@@ -35,6 +36,8 @@ Después de cambiar el rol, inicia sesión de nuevo para recibir un token con el
 
 El `collection-service` escucha en el puerto `8083` y consulta `catalog-service` en `8081` para validar las fichas asociadas. La URL del catálogo puede configurarse con `ACERVO_CATALOG_URL`.
 
+El administrador puede consultar `GET /api/v1/admin/collectors/{collectorId}/collections` en collection-service para ver el número de colecciones, ejemplares por colección y cantidades por ubicación. No se devuelven títulos, precios ni notas. Desactivar una cuenta conserva sus datos y bloquea nuevos inicios de sesión; los JWT ya emitidos siguen activos hasta expirar (máximo 15 minutos). No se puede desactivar o degradar al último administrador ni administrar la propia cuenta.
+
 ## Interfaz web
 
 La aplicación Angular está en `frontend`. Para iniciarla, arranca identity-service (`8082`), catalog-service (`8081`) y collection-service (`8083`), y después ejecuta:
@@ -46,7 +49,11 @@ npm start
 
 El servidor local escucha en `http://localhost:4200` y usa `proxy.conf.json` para dirigir autenticación, catálogo y colecciones a sus respectivos servicios. La sesión requiere iniciar sesión o registrarse. El JWT se añade automáticamente a las operaciones protegidas.
 
-La interfaz permite consultar y crear/editar fichas, filtrar el catálogo por tipo, crear tipos personales y atributos, administrar colecciones y ubicaciones, y gestionar copias y deseos, incluida su conversión a ejemplar.
+Los tokens vencen 15 minutos después de emitirse; es un vencimiento absoluto, no se reinicia con la actividad. Si la sesión caduca o un servicio responde `401`, la interfaz elimina el token, vuelve al acceso y muestra un aviso para iniciar sesión otra vez. Un error `503` indica que el servicio solicitado no está disponible.
+
+La interfaz permite consultar y crear/editar fichas, filtrar el catálogo por tipo, crear tipos personales y atributos, administrar colecciones y ubicaciones, y gestionar copias y deseos, incluida su conversión a ejemplar. Con rol `ADMIN` aparece la opción **Usuarios** para administrar cuentas y consultar sus cantidades por colección.
+
+Al iniciar sesión, la pantalla inicial es **Colecciones**. La navegación sigue el orden Colecciones, Catálogo, Tipos y atributos y, solo para administradores, Usuarios. Las condiciones de ejemplar, prioridades, roles, tipos de atributo e identificadores se muestran en castellano; los códigos internos enviados a la API se mantienen.
 
 El selector fijo **Estilo** cambia entre tres interfaces y recuerda la elección en el navegador: **Clásico**, **Expedición** (bitácora lateral, mapas y fichas de campo) y **Neón** (HUD, dock inferior y paneles de ciencia ficción).
 

@@ -2,12 +2,15 @@
 
 @if (auth.isAuthenticated()) {
   <header class="topbar">
-    <a class="brand" routerLink="/catalog" aria-label="Acervo Digital, inicio"><app-brand /></a>
+    <a class="brand" routerLink="/collections" aria-label="Acervo Digital, inicio"><app-brand /></a>
     <p class="hud-status" aria-hidden="true"><span class="hud-dot"></span>Enlace estable · 3 servicios · sesión cifrada</p>
     <nav class="primary-nav" aria-label="Navegación principal">
-      <a routerLink="/catalog" routerLinkActive="is-active"><span class="nav-index" aria-hidden="true">01</span><svg [lucideIcon]="icons.LucideLibrary" aria-hidden="true"></svg> <span class="nav-text">Catálogo</span></a>
-      <a routerLink="/collections" routerLinkActive="is-active"><span class="nav-index" aria-hidden="true">02</span><svg [lucideIcon]="icons.LucideBoxes" aria-hidden="true"></svg> <span class="nav-text">Colecciones</span></a>
+      <a routerLink="/collections" routerLinkActive="is-active"><span class="nav-index" aria-hidden="true">01</span><svg [lucideIcon]="icons.LucideBoxes" aria-hidden="true"></svg> <span class="nav-text">Colecciones</span></a>
+      <a routerLink="/catalog" routerLinkActive="is-active"><span class="nav-index" aria-hidden="true">02</span><svg [lucideIcon]="icons.LucideLibrary" aria-hidden="true"></svg> <span class="nav-text">Catálogo</span></a>
       <a routerLink="/types" routerLinkActive="is-active"><span class="nav-index" aria-hidden="true">03</span><svg [lucideIcon]="icons.LucideSlidersHorizontal" aria-hidden="true"></svg> <span class="nav-text">Tipos y atributos</span></a>
+      @if (auth.isAdmin()) {
+        <a routerLink="/users" routerLinkActive="is-active"><span class="nav-index" aria-hidden="true">04</span><svg [lucideIcon]="icons.LucideUsersRound" aria-hidden="true"></svg> <span class="nav-text">Usuarios</span></a>
+      }
     </nav>
     <p class="log-note" aria-hidden="true">Diario de a bordo · día {{ dayOfYear }}</p>
     <div class="account-menu">

@@ -3,11 +3,146 @@ openapi: 3.0.3
 info:
   title: Acervo Digital - Identity Service
   version: 0.3.0
-  description: Registro de coleccionistas y emisión de tokens JWT HS256.
+  description: Registro, emisión de tokens JWT HS256 y administración protegida de cuentas de coleccionista.
 servers:
   - url: http://localhost:8082
     description: Entorno local de desarrollo
+tags:
+  - name: Administración de usuarios
+    description: Operaciones exclusivas para administradores
 paths:
+  /api/v1/admin/users:
+    get:
+      tags:
+        - Administración de usuarios
+      operationId: listCollectors
+      summary: Lista las cuentas sin incluir credenciales
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cuentas ordenadas por fecha de alta descendente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdminCollector'
+        '401':
+          description: Falta un bearer token válido o ha expirado
+        '403':
+          description: Se requiere el rol ADMIN
+    post:
+      tags:
+        - Administración de usuarios
+      operationId: createCollectorAsAdmin
+      summary: Crea una cuenta USER desde administración
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAdminCollectorRequest'
+      responses:
+        '201':
+          description: Cuenta creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCollector'
+        '400':
+          description: La petición no supera la validación
+        '401':
+          description: Falta un bearer token válido o ha expirado
+        '403':
+          description: Se requiere el rol ADMIN
+        '409':
+          description: Ya existe una cuenta con ese email
+
+  /api/v1/admin/users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/CollectorId'
+    put:
+      tags:
+        - Administración de usuarios
+      operationId: updateCollectorAsAdmin
+      summary: Actualiza otra cuenta, su rol y su estado
+      description: No permite operar sobre la propia cuenta ni desactivar/degradar al último administrador activo.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAdminCollectorRequest'
+      responses:
+        '200':
+          description: Cuenta actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCollector'
+        '400':
+          description: La petición no supera la validación
+        '401':
+          description: Falta un bearer token válido o ha expirado
+        '403':
+          description: Se requiere ADMIN o se intentó modificar la propia cuenta
+        '404':
+          description: Cuenta no encontrada
+        '409':
+          description: Email duplicado o la operación dejaría el sistema sin administrador activo
+    delete:
+      tags:
+        - Administración de usuarios
+      operationId: deactivateCollectorAsAdmin
+      summary: Desactiva otra cuenta sin borrar sus datos
+      description: Impide iniciar nuevas sesiones. Los JWT ya emitidos siguen válidos hasta su expiración, como máximo 15 minutos.
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Cuenta desactivada
+        '401':
+          description: Falta un bearer token válido o ha expirado
+        '403':
+          description: Se requiere ADMIN o se intentó desactivar la propia cuenta
+        '404':
+          description: Cuenta no encontrada
+        '409':
+          description: La operación dejaría el sistema sin administrador activo
+
+  /api/v1/admin/users/{id}/password:
+    parameters:
+      - $ref: '#/components/parameters/CollectorId'
+    put:
+      tags:
+        - Administración de usuarios
+      operationId: resetCollectorPasswordAsAdmin
+      summary: Asigna una contraseña nueva a otra cuenta
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetAdminCollectorPasswordRequest'
+      responses:
+        '204':
+          description: Contraseña restablecida; no se devuelve la contraseña ni su hash
+        '400':
+          description: La contraseña no supera la validación
+        '401':
+          description: Falta un bearer token válido o ha expirado
+        '403':
+          description: Se requiere ADMIN o se intentó restablecer la propia contraseña
+        '404':
+          description: Cuenta no encontrada
+
   /api/v1/auth/register:
     post:
       operationId: registerCollector
@@ -52,6 +187,20 @@ paths:
         '401':
           description: Email o contraseña incorrectos
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    CollectorId:
+      name: id
+      in: path
+      required: true
+      description: UUID de la cuenta
+      schema:
+        type: string
+        format: uuid
   schemas:
     RegisterCollectorRequest:
       type: object
@@ -107,6 +256,83 @@ components:
           enum:
             - USER
             - ADMIN
+    CreateAdminCollectorRequest:
+      type: object
+      required:
+        - email
+        - password
+        - displayName
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+    UpdateAdminCollectorRequest:
+      type: object
+      required:
+        - email
+        - displayName
+        - role
+        - active
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 100
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        active:
+          type: boolean
+    ResetAdminCollectorPasswordRequest:
+      type: object
+      required:
+        - password
+      properties:
+        password:
+          type: string
+          format: password
+          minLength: 8
+          maxLength: 72
+    AdminCollector:
+      type: object
+      required:
+        - collectorId
+        - email
+        - displayName
+        - role
+        - active
+        - createdAt
+      properties:
+        collectorId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        displayName:
+          type: string
+        role:
+          type: string
+          enum: [USER, ADMIN]
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
     TokenResponse:
       type: object
       required:

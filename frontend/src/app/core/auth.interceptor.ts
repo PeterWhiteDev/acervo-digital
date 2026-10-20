@@ -1,14 +1,25 @@
 import { inject } from '@angular/core';
-import { HttpInterceptorFn } from '@angular/common/http';
+import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
 import { AuthService } from './auth.service';
+import { catchError, throwError } from 'rxjs';
 
 export const authInterceptor: HttpInterceptorFn = (request, next) => {
-  const token = inject(AuthService).token();
+  const auth = inject(AuthService);
+  const token = auth.token();
   if (!token) {
     return next(request);
   }
 
-  return next(request.clone({
+  const authorizedRequest = request.clone({
     setHeaders: { Authorization: `Bearer ${token}` },
+  });
+
+  return next(authorizedRequest).pipe(catchError((error: unknown) => {
+    if (error instanceof HttpErrorResponse
+      && error.status === 401
+      && !request.url.includes('/api/v1/auth/token')) {
+      auth.expireSession();
+    }
+    return throwError(() => error);
   }));
 };

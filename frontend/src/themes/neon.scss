@@ -210,6 +210,38 @@ html[data-theme="neon"]:not(#theme-guard) {
   .no-collection-icon { background: rgba(255, 138, 42, .15); border: 1px solid #ff8a2a; color: #ff8a2a; }
   .conversion-title { background: rgba(63, 214, 255, .08); color: #3fd6ff; font-family: var(--display-font); }
 
+  // Users: the search console sits beside a compact admin table.
+  app-users-page .users-page { column-gap: 1rem; display: grid; grid-template-columns: 230px minmax(0, 1fr); }
+  app-users-page .page-heading, app-users-page .notice { grid-column: 1 / -1; }
+  app-users-page .user-toolbar { align-content: start; background: var(--surface); border: 1px solid var(--line); clip-path: var(--cut); flex-direction: column; grid-column: 1; grid-row: 2; padding: .8rem; }
+  app-users-page .search-field { max-width: none; }
+  app-users-page .user-total { color: #7dffa8; font-family: var(--mono-font); margin: 0; }
+  app-users-page .table-wrap { background: var(--surface); border: 1px solid var(--line); clip-path: var(--cut); grid-column: 2; grid-row: 2 / span 2; }
+  app-users-page .users-table { min-width: 760px; }
+  app-users-page .users-table th { background: rgba(63, 214, 255, .08); color: #3fd6ff; font-family: var(--mono-font); }
+  app-users-page .users-table td { border-top-color: rgba(63, 214, 255, .1); }
+  app-users-page .users-table .user-row:hover { background: linear-gradient(90deg, rgba(255, 138, 42, .12), transparent); box-shadow: inset 3px 0 #ff8a2a; }
+  app-users-page .user-identity strong { color: #eaf7ff; }
+  app-users-page .user-identity code { color: #4d9cb4; }
+  app-users-page .role-badge { background: rgba(63, 214, 255, .08); border-color: rgba(63, 214, 255, .35); border-radius: 0; color: #3fd6ff; font-family: var(--mono-font); }
+  app-users-page .role-badge.admin { background: rgba(255, 138, 42, .12); border-color: rgba(255, 138, 42, .55); color: #ffb36b; }
+  app-users-page .status-badge { background: rgba(125, 255, 168, .08); border-color: rgba(125, 255, 168, .3); border-radius: 0; color: #7dffa8; font-family: var(--mono-font); }
+  app-users-page .status-badge.inactive { background: rgba(255, 77, 94, .1); border-color: rgba(255, 77, 94, .4); color: #ff8592; }
+  app-users-page .count-button, app-users-page .icon-action { background: rgba(63, 214, 255, .06); border-color: rgba(63, 214, 255, .3); border-radius: 0; color: #3fd6ff; }
+  app-users-page .icon-action.danger-action { border-color: rgba(255, 77, 94, .45); color: #ff4d5e; }
+  app-users-page .icon-action.activate-action { border-color: rgba(125, 255, 168, .45); color: #7dffa8; }
+  app-users-page .self-note { color: #7f93a9; font-family: var(--mono-font); }
+  app-users-page .details-row > td { background: rgba(63, 214, 255, .04); }
+  app-users-page .details-heading span, app-users-page .details-message { color: #7f93a9; }
+  app-users-page .collection-count-card { background: rgba(2, 6, 14, .72); border-color: rgba(63, 214, 255, .25); border-radius: 0; clip-path: var(--cut); }
+  app-users-page .collection-count-card > header { border-bottom-color: rgba(63, 214, 255, .18); }
+  app-users-page .collection-count-card > header strong { color: #eaf7ff; }
+  app-users-page .collection-count-card > header b { background: rgba(255, 138, 42, .14); border-radius: 0; color: #ffb36b; font-family: var(--mono-font); }
+  app-users-page .location-counts > div { color: #7f93a9; font-family: var(--mono-font); }
+  app-users-page .location-counts strong { color: #3fd6ff; }
+  app-users-page .user-editor { background: linear-gradient(180deg, #0a1426, #060c18); border: 1px solid rgba(63, 214, 255, .45); border-radius: 0; clip-path: var(--cut); }
+  app-users-page .user-editor input, app-users-page .user-editor select { background: rgba(2, 6, 14, .85); border-color: rgba(63, 214, 255, .3); border-radius: 0; color: #eaf7ff; }
+
   // Access: the city fills the screen and the form floats as a terminal.
   .auth-page { display: block; min-height: 100dvh; position: relative; }
   .auth-aside { background: transparent; inset: 0; position: absolute; }
@@ -240,6 +272,9 @@ html[data-theme="neon"]:not(#theme-guard) {
   @media (max-width: 960px) {
     app-catalog-page { display: block; }
     app-catalog-page .catalog-tools { position: static; }
+    app-users-page .users-page { display: block; }
+    app-users-page .user-toolbar { margin-bottom: 1rem; }
+    app-users-page .table-wrap { clip-path: none; }
     .types-layout { grid-template-columns: 1fr; }
     .type-list { order: 0; }
   }

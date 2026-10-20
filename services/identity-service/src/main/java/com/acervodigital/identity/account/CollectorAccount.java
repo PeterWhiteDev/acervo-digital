@@ -32,6 +32,9 @@ public class CollectorAccount {
     @Column(nullable = false, length = 20)
     private CollectorRole role;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
     @Embedded
     private CollectorProfile profile;
 
@@ -50,6 +53,17 @@ public class CollectorAccount {
 
     public static CollectorAccount register(String email, String passwordHash, String displayName) {
         return new CollectorAccount(email, passwordHash, CollectorProfile.create(displayName));
+    }
+
+    public void update(String email, String displayName, CollectorRole role, boolean active) {
+        this.email = email;
+        this.profile.updateDisplayName(displayName);
+        this.role = role;
+        this.active = active;
+    }
+
+    public void resetPassword(String passwordHash) {
+        this.passwordHash = passwordHash;
     }
 
     @PrePersist
@@ -71,6 +85,10 @@ public class CollectorAccount {
 
     public CollectorRole getRole() {
         return role;
+    }
+
+    public boolean isActive() {
+        return active;
     }
 
     public CollectorProfile getProfile() {

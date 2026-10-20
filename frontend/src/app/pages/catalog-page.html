@@ -90,7 +90,7 @@
           @for (identifier of identifiers; track $index) {
             <div class="identifier-row">
               <select [name]="'scheme-' + $index" [(ngModel)]="identifier.scheme">
-                @for (scheme of identifierSchemes; track scheme) { <option [value]="scheme">{{ scheme }}</option> }
+                @for (scheme of identifierSchemes; track scheme) { <option [value]="scheme">{{ identifierSchemeLabel(scheme) }}</option> }
               </select>
               <input [name]="'identifier-' + $index" [(ngModel)]="identifier.value" maxlength="120" placeholder="Valor" />
               <button type="button" class="remove-button" (click)="removeIdentifier($index)" [attr.aria-label]="'Quitar identificador ' + ($index + 1)">×</button>

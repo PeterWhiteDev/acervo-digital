@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.acervodigital</groupId>
         <artifactId>acervo-digital-parent</artifactId>
-        <version>0.6.1</version>
+        <version>0.7.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -31,6 +31,10 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
         </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>

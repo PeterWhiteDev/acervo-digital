@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CatalogApi } from '../core/api.service';
-import { AttributeDataType, AttributeDefinition, ItemType } from '../core/models';
+import { ATTRIBUTE_DATA_TYPE_LABELS, AttributeDataType, AttributeDefinition, ItemType } from '../core/models';
 
 @Component({
   selector: 'app-types-page',
@@ -28,6 +28,10 @@ export class TypesPage implements OnInit {
 
   protected get selectedType(): ItemType | undefined {
     return this.types().find((type) => type.id === this.selectedTypeId());
+  }
+
+  protected dataTypeLabel(dataType: AttributeDataType): string {
+    return ATTRIBUTE_DATA_TYPE_LABELS[dataType];
   }
 
   ngOnInit(): void {
@@ -110,10 +114,21 @@ export class TypesPage implements OnInit {
 
   private showError(error: unknown): void {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    this.error.set(status === 403
-      ? 'No se pueden modificar las plantillas globales.'
-      : status === 409
-        ? 'Ya existe un tipo o una clave de atributo con ese nombre.'
-        : 'No se pudo completar la operación. Comprueba los datos y el servicio de catálogo.');
+    switch (status) {
+      case 401:
+        this.error.set('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+        break;
+      case 403:
+        this.error.set('No se pueden modificar las plantillas globales.');
+        break;
+      case 409:
+        this.error.set('Ya existe un tipo o una clave de atributo con ese nombre.');
+        break;
+      case 503:
+        this.error.set('El catálogo no está disponible en este momento.');
+        break;
+      default:
+        this.error.set('No se pudo completar la operación. Revisa los datos o la conexión con el catálogo.');
+    }
   }
 }

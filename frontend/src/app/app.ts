@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { AuthService } from './core/auth.service';
@@ -22,6 +22,14 @@ export class App {
   protected readonly dayOfYear = Math.ceil(
     (Date.now() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86_400_000,
   );
+
+  constructor() {
+    effect(() => {
+      if (!this.auth.sessionExpired()) return;
+      const returnUrl = this.router.url;
+      void this.router.navigate(['/login'], { queryParams: { session: 'expired', returnUrl } });
+    });
+  }
 
   protected logout(): void {
     this.auth.logout();
