@@ -1,10 +1,12 @@
 # Analisis de requisitos: Gestor de colecciones
 
+> Documento de requisitos base. El estado vigente de implementación se mantiene en [hoja-de-ruta.md](hoja-de-ruta.md); las menciones de fases futuras en este documento se actualizaron para distinguir lo implementado de lo pendiente.
+
 ## 1. Introduccion
 
 El sistema permitira a distintos coleccionistas registrar y organizar colecciones de elementos heterogeneos, como libros, peliculas, juegos de mesa, videojuegos o juegos de cartas.
 
-La aplicacion se diseñara de forma generica para admitir nuevos tipos de elementos y atributos configurables sin modificar el modelo principal. Contara con una API REST basada en microservicios y, posteriormente, con una interfaz web desarrollada en Angular.
+La aplicacion se diseña de forma generica para admitir nuevos tipos de elementos y atributos configurables sin modificar el modelo principal. Cuenta con una API REST basada en microservicios y una interfaz web desarrollada en Angular.
 
 ## 2. Objetivos
 
@@ -16,7 +18,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 - Permitir tipos y atributos configurables.
 - Gestionar una lista de deseos por coleccion.
 - Ofrecer operaciones CRUD mediante una API REST.
-- Disponer posteriormente de una interfaz web Angular.
+- Disponer de una interfaz web Angular.
 - Servir como proyecto práctico para aprender Spring Boot, microservicios, persistencia y bases de datos, seguridad, pruebas, Git/GitHub, gestión de ramas, versionado, releases y prácticas DevOps.
 
 ## 3. Actores
@@ -51,7 +53,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 - Cada usuario administra un unico perfil.
 - Un coleccionista puede administrar varias colecciones.
 - Se contemplan los roles `USER` y `ADMIN`.
-- La autenticacion con JWT se incorporara en una fase posterior.
+- La autenticación JWT con roles `USER` y `ADMIN` está implementada en `identity-service`; la administración de cuentas `0.7.0` está validada e integrada en `develop` mediante la PR #12, pendiente de publicación.
 
 ### 4.2 Colecciones
 
@@ -71,7 +73,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 - Distintos coleccionistas podran asociar copias privadas al mismo elemento del catalogo.
 - Un usuario podra crear elementos nuevos en el catalogo.
 - Un usuario solo podra modificar los elementos creados por el, salvo que tenga rol de administrador.
-- Un elemento del catalogo no podra eliminarse si existen copias o deseos asociados.
+- Un elemento del catalogo no debe poder eliminarse si existen copias o deseos asociados. La protección entre servicios sigue pendiente; consultar la hoja de ruta.
 - Los elementos podran existir sin identificador.
 - Un elemento podra tener varios identificadores.
 - Ejemplos de identificadores: ISBN-10, ISBN-13, EAN, UPC o un codigo de edicion.
@@ -108,6 +110,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 - Las categorias no se utilizaran como sustituto de los tipos o atributos.
 - Los creadores, como autores o directores, formaran parte de la informacion del catalogo.
 - No se incluiran etiquetas libres en el MVP.
+- Categorías y creadores estructurados siguen pendientes de planificación e implementación.
 
 ### 4.7 Copias privadas
 
@@ -151,7 +154,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 
 ### 4.10 Imagenes
 
-- En el MVP se permitira una imagen principal por elemento del catalogo.
+- Se requiere una imagen principal por elemento del catalogo, pero su carga y almacenamiento siguen pendientes.
 - La imagen representara el elemento general, por ejemplo la portada de un libro.
 - Las fotografias privadas de copias concretas podran añadirse en una fase posterior.
 - Se definiran limites de formato y tamaño antes de implementar la carga de archivos.
@@ -169,7 +172,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 9. Un deseo pertenece a una unica coleccion.
 10. La conversion de un deseo debe crear la copia y eliminar el deseo dentro de una operacion consistente.
 11. Un elemento del catalogo puede tener cero o varios identificadores.
-12. La combinacion de tipo y valor de un identificador debe evitar duplicados incompatibles en el catalogo.
+12. La combinación global de esquema y valor normalizado de un identificador debe ser única; esta regla está implementada en la migración del catálogo.
 13. Un elemento con referencias desde copias o deseos no puede eliminarse.
 14. Todos los importes se expresan en euros.
 15. Los precios no pueden ser negativos.
@@ -265,7 +268,8 @@ El usuario busca elementos por titulo, tipo, categoria o identificador y filtra 
 - Usuarios.
 - Perfiles de coleccionista.
 - Roles.
-- Autenticacion y JWT en una fase posterior.
+- Registro, perfiles básicos, roles `USER`/`ADMIN` y emisión/validación JWT HS256 implementados.
+- Administración de cuentas `0.7.0` implementada, validada e integrada en `develop` mediante la PR #12; publicación pendiente.
 
 #### catalog-service
 
@@ -308,7 +312,7 @@ El usuario busca elementos por titulo, tipo, categoria o identificador y filtra 
 - Flyway desde el inicio para versionar el esquema.
 - PostgreSQL en una fase posterior.
 - OpenAPI/Swagger para documentar y probar los endpoints.
-- Angular 17 para el frontend posterior.
+- Angular 22 para el frontend; el entorno local requiere Node.js 26 y npm 11.
 - Monorepositorio.
 - Una base de datos independiente por microservicio.
 
@@ -360,7 +364,7 @@ Las pruebas se incorporaran desde el inicio y creceran con cada fase.
 - Migraciones de base de datos reproducibles.
 - Codigo organizado por responsabilidades y servicios.
 - Interfaz web adaptable a escritorio y dispositivos moviles.
-- Almacenamiento seguro de contraseñas cuando se incorpore autenticacion.
+- Almacenamiento seguro de contraseñas mediante BCrypt.
 
 ## 14. Fuera de alcance
 
@@ -386,6 +390,7 @@ Las pruebas se incorporaran desde el inicio y creceran con cada fase.
 - Tipos, atributos, elementos e identificadores.
 - Plantillas iniciales para libros y peliculas.
 - API REST, documentacion OpenAPI y pruebas.
+- Estado: catálogo e identificadores implementados; categorías, creadores, imagen principal y protección de borrado referenciado siguen pendientes.
 
 ### Fase 2: Colecciones
 
@@ -393,12 +398,14 @@ Las pruebas se incorporaran desde el inicio y creceran con cada fase.
 - Colecciones, copias, ubicaciones y visibilidad.
 - Comunicacion REST con el catalogo.
 - Pruebas unitarias y de integracion.
+- Estado: colecciones, ubicaciones, copias y privacidad pública implementadas y validadas.
 
 ### Fase 3: Lista de deseos
 
 - Lista independiente por coleccion.
 - Prioridades.
 - Conversion transaccional de deseos en copias.
+- Estado: implementada y validada manualmente en Bruno.
 
 ### Fase 4: Identidad y seguridad
 
@@ -407,6 +414,7 @@ Las pruebas se incorporaran desde el inicio y creceran con cada fase.
 - Roles `USER` y `ADMIN`.
 - JWT.
 - API Gateway.
+- Estado: identidad, JWT, autorización y administración de cuentas `0.7.0` implementados; API Gateway pendiente.
 
 ### Fase 5: PostgreSQL
 
@@ -414,27 +422,28 @@ Las pruebas se incorporaran desde el inicio y creceran con cada fase.
 - Adaptacion y validacion de migraciones Flyway.
 - Testcontainers.
 - Docker Compose para servicios y bases de datos.
+- Estado: pendiente para la preparación de `1.0.0`.
 
 ### Fase 6: Frontend
 
-- Aplicacion Angular 17.
+- Aplicacion Angular 22.
 - Autenticacion.
 - CRUD de colecciones, catalogo y copias.
 - Formularios dinamicos segun el tipo de elemento.
 - Lista de deseos.
 - Consulta publica de colecciones.
 - Diseño adaptable.
+- Estado: flujos principales, temas y administración implementados y validados manualmente de extremo a extremo.
 
 ## 16. Decisiones pendientes de detalle
 
 Estas decisiones no bloquean el inicio, pero deberan concretarse antes de implementar la funcionalidad correspondiente:
 
-- Version menor exacta de Spring Boot 3.x.
-- Limites de tamaño y formatos permitidos para imagenes.
-- Estrategia de almacenamiento de imagenes: sistema de archivos, base de datos o almacenamiento de objetos.
-- Campos exactos del perfil del coleccionista.
-- Criterio exacto para detectar duplicados en el catalogo.
-- Comportamiento de borrado de una coleccion con copias o deseos.
-- Nivel de detalle que una coleccion publica muestra sobre precios, ubicaciones y notas privadas.
+- Límites de tamaño y formatos permitidos para imágenes.
+- Estrategia de almacenamiento de imágenes: sistema de archivos, base de datos o almacenamiento de objetos.
+- Política de nombres duplicados para tipos, colecciones, categorías y ubicaciones.
 - Reglas para editar un elemento compartido que ya utilizan otros coleccionistas.
-- Politica de nombres duplicados para tipos, colecciones, categorias y ubicaciones.
+- Reglas adicionales de atributos (valores enumerados, unicidad y límites), junto con la protección de datos existentes al cambiar definiciones.
+- Estrategia de integración que impida borrar fichas con referencias en otros servicios.
+
+La unicidad de identificadores ya está definida por esquema y valor normalizado a nivel global; no debe confundirse con la decisión de si una ficha representa una obra o una edición concreta, que aún requiere definición de producto.
