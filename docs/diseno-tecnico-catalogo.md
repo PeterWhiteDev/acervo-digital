@@ -1,5 +1,7 @@
 # Diseño técnico inicial: catálogo
 
+> Diseño de la primera etapa, conservado como referencia histórica. El estado actual y los siguientes pasos están en [hoja-de-ruta.md](hoja-de-ruta.md); los contratos OpenAPI vigentes prevalecen sobre las rutas propuestas aquí.
+
 ## Alcance del primer incremento
 
 Implementar `catalog-service` como primera historia vertical del monorepositorio. Permitirá gestionar tipos configurables y elementos compartidos del catálogo, con sus identificadores, atributos y una imagen principal.
@@ -77,7 +79,7 @@ Permite asociar varios identificadores opcionales a un elemento, por ejemplo ISB
 - `scheme`: tipo de identificador, por ejemplo `ISBN-13`
 - `value`: valor normalizado
 
-En esta fase no se impondrá unicidad global al valor: esa regla necesita concretar cómo se comparan esquemas y valores.
+La implementación impone unicidad global por combinación de `scheme` y `value` normalizado (migración V5). La regla está implementada; queda por aclarar a nivel de producto si la ficha representa una obra o una edición concreta.
 
 ### `AttributeValue`
 
@@ -108,6 +110,7 @@ Las plantillas globales se pueden consultar, pero sus definiciones no se pueden 
 - `POST /api/v1/items`: crear un elemento y sus valores de atributos.
 - `GET /api/v1/items`: listar con paginación y filtro opcional por tipo.
 - `GET /api/v1/items/{id}`: consultar la ficha completa.
+- `PUT /api/v1/items/{id}`: reemplazar los datos editables de una ficha sin cambiar su tipo.
 
 La ficha guarda los valores dinámicos en `attribute_value`; la API valida cada valor según el tipo declarado en `AttributeDefinition`.
 
@@ -148,10 +151,10 @@ La base de datos de desarrollo será H2 persistida en archivo. Las pruebas usar�
 ## Decisiones pendientes
 
 - Si la imagen se sube al servicio o se gestiona externamente; este diseño solo reserva una referencia.
-- El mecanismo temporal exacto para identificar al creador antes de integrar autenticación.
-- Si `DELETE` será borrado físico o lógico al existir referencias desde colecciones.
+- El mecanismo de protección/coordinación para impedir `DELETE` cuando existan referencias desde colecciones o deseos; sigue pendiente de integración.
 - Si las definiciones admiten valores enumerados, unicidad o reglas adicionales.
+- Los límites de longitud, precisión y escala de los valores dinámicos.
 
-## Siguiente paso
+## Siguiente paso original
 
-Revisar estas decisiones pendientes y ajustar el modelo. Después, generar el esqueleto Maven de `catalog-service` y completar la historia vertical empezando por migración, entidades y pruebas de persistencia.
+El esqueleto y la historia vertical inicial del catálogo ya se completaron. Las decisiones aún abiertas y su planificación vigente se mantienen en la hoja de ruta y en el seguimiento del 2026-10-14.
