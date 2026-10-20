@@ -3,13 +3,14 @@ openapi: 3.0.3
 info:
   title: Acervo Digital - Collection Service
   version: 0.5.0
-  description: API para administrar colecciones, ubicaciones, copias y listas de deseos.
+  description: API para administrar colecciones, ubicaciones, copias, listas de deseos y resúmenes de cantidades para administradores.
 servers:
   - url: http://localhost:8083
     description: Entorno local de desarrollo
 security:
   - BearerAuth: []
 tags:
+  - name: Administración de usuarios
   - name: Colecciones privadas
   - name: Colecciones públicas
   - name: Ubicaciones
@@ -17,6 +18,33 @@ tags:
   - name: Copias públicas
   - name: Listas de deseos
 paths:
+  /api/v1/admin/collectors/{collectorId}/collections:
+    get:
+      tags:
+        - Administración de usuarios
+      operationId: getCollectorCollectionCounts
+      summary: Resume cantidades de colecciones, ejemplares y ubicaciones de un usuario
+      description: Solo ADMIN. No devuelve títulos, precios ni notas de ejemplares.
+      parameters:
+        - name: collectorId
+          in: path
+          required: true
+          description: UUID del propietario
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Cantidades agrupadas por usuario, colección y ubicación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCollectorCollectionsSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Se requiere el rol ADMIN
+
   /api/v1/collections/{collectionId}/wishlist:
     parameters:
       - $ref: '#/components/parameters/CollectionIdPath'
@@ -658,6 +686,65 @@ components:
     NotFound:
       description: Recurso inexistente o colección no pública en una consulta pública
   schemas:
+    AdminCollectorCollectionsSummary:
+      type: object
+      required:
+        - collectorId
+        - collectionCount
+        - collections
+      properties:
+        collectorId:
+          type: string
+          format: uuid
+        collectionCount:
+          type: integer
+          minimum: 0
+        collections:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminCollectionSummary'
+    AdminCollectionSummary:
+      type: object
+      required:
+        - collectionId
+        - name
+        - visibility
+        - itemCount
+        - itemsByLocation
+        - unassignedItemCount
+      properties:
+        collectionId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        visibility:
+          $ref: '#/components/schemas/CollectionVisibility'
+        itemCount:
+          type: integer
+          minimum: 0
+        itemsByLocation:
+          type: array
+          items:
+            $ref: '#/components/schemas/LocationItemCount'
+        unassignedItemCount:
+          type: integer
+          minimum: 0
+    LocationItemCount:
+      type: object
+      required:
+        - locationId
+        - locationName
+        - itemCount
+      properties:
+        locationId:
+          type: string
+          format: uuid
+        locationName:
+          type: string
+        itemCount:
+          type: integer
+          minimum: 0
     CreateLocationRequest:
       type: object
       required:

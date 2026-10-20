@@ -1,0 +1,147 @@
+<section class="users-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">CONTROL DE ACCESO</p>
+      <h1>Usuarios</h1>
+      <p class="subtitle">Cuentas, estado y uso de colecciones.</p>
+    </div>
+    <button class="primary-button" type="button" (click)="openCreate()">
+      <svg [lucideIcon]="icons.LucideUserRoundPlus" aria-hidden="true"></svg>
+      Nuevo usuario
+    </button>
+  </header>
+
+  @if (success()) { <output class="notice success">{{ success() }}</output> }
+  @if (error()) { <p class="notice error" role="alert">{{ error() }}</p> }
+
+  <section class="user-toolbar" aria-label="Buscar usuarios">
+    <label class="search-field">
+      <span class="visually-hidden">Buscar usuarios por nombre, correo o rol</span>
+      <svg [lucideIcon]="icons.LucideSearch" aria-hidden="true"></svg>
+      <input type="search" placeholder="Buscar por nombre, correo o rol" [ngModel]="query()" (ngModelChange)="query.set($event)" />
+    </label>
+    <span class="user-total">{{ filteredUsers().length }} / {{ users().length }} cuentas</span>
+  </section>
+
+  <div class="table-wrap">
+    <table class="users-table">
+      <thead>
+        <tr>
+          <th>Cuenta</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Alta</th>
+          <th>Colecciones</th>
+          <th><span class="visually-hidden">Acciones</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of filteredUsers(); track user.collectorId) {
+          <tr class="user-row" [class.self-row]="isSelf(user)">
+            <td class="user-identity">
+              <strong>{{ user.displayName }}</strong>
+              <span>{{ user.email }}</span>
+              <code>{{ user.collectorId }}</code>
+            </td>
+            <td><span class="role-badge" [class.admin]="user.role === 'ADMIN'">{{ roleLabel(user.role) }}</span></td>
+            <td><span class="status-badge" [class.inactive]="!user.active">{{ user.active ? 'Activa' : 'Inactiva' }}</span></td>
+            <td class="created-date">{{ user.createdAt | date:'mediumDate' }}</td>
+            <td>
+              <button class="count-button" type="button" [attr.aria-expanded]="expandedId() === user.collectorId" (click)="toggleDetails(user)">
+                @if (detailLoadingId() === user.collectorId) { … }
+                @else if (summaries()[user.collectorId]; as summary) { {{ summary.collectionCount }} <svg [lucideIcon]="icons.LucideChevronDown" aria-hidden="true"></svg> }
+                @else { Ver cantidades <svg [lucideIcon]="icons.LucideChevronDown" aria-hidden="true"></svg> }
+              </button>
+            </td>
+            <td class="row-actions">
+              @if (isSelf(user)) {
+                <span class="self-note">Tu cuenta · protegida</span>
+              } @else {
+                <button class="icon-action" type="button" title="Editar usuario" [attr.aria-label]="'Editar ' + user.email" (click)="openEdit(user)"><svg [lucideIcon]="icons.LucidePencil" aria-hidden="true"></svg></button>
+                <button class="icon-action" type="button" title="Restablecer contraseña" [attr.aria-label]="'Restablecer contraseña de ' + user.email" (click)="openPasswordReset(user)"><svg [lucideIcon]="icons.LucideKeyRound" aria-hidden="true"></svg></button>
+                @if (user.active) {
+                  <button class="icon-action danger-action" type="button" title="Desactivar cuenta" [attr.aria-label]="'Desactivar ' + user.email" (click)="deactivate(user)"><svg [lucideIcon]="icons.LucideUserRoundX" aria-hidden="true"></svg></button>
+                } @else {
+                  <button class="icon-action activate-action" type="button" title="Reactivar cuenta" [attr.aria-label]="'Reactivar ' + user.email" (click)="toggleActive(user)"><svg [lucideIcon]="icons.LucideUserRoundCheck" aria-hidden="true"></svg></button>
+                }
+              }
+            </td>
+          </tr>
+          @if (expandedId() === user.collectorId) {
+            <tr class="details-row">
+              <td colspan="6">
+                @if (detailLoadingId() === user.collectorId) {
+                  <p class="details-message">Cargando resumen…</p>
+                } @else if (summaries()[user.collectorId]; as summary) {
+                  <div class="details-heading"><strong>{{ summary.collectionCount }} colecciones</strong><span>Conteos agrupados por ubicación; sin títulos ni datos privados.</span></div>
+                  <div class="collection-counts">
+                    @for (collection of summary.collections; track collection.collectionId) {
+                      <article class="collection-count-card">
+                        <header><div><strong>{{ collection.name }}</strong><span>{{ collection.visibility === 'PUBLIC' ? 'Pública' : 'Privada' }}</span></div><b>{{ collection.itemCount }} ejemplares</b></header>
+                        <div class="location-counts">
+                          @for (location of collection.itemsByLocation; track location.locationId) {
+                            <div><span>{{ location.locationName }}</span><strong>{{ location.itemCount }}</strong></div>
+                          }
+                          @if (collection.unassignedItemCount > 0) {
+                            <div><span>Sin ubicación</span><strong>{{ collection.unassignedItemCount }}</strong></div>
+                          }
+                          @if (collection.itemCount === 0) { <p>Sin ejemplares.</p> }
+                        </div>
+                      </article>
+                    } @empty {
+                      <p class="details-message">Este usuario no tiene colecciones.</p>
+                    }
+                  </div>
+                }
+              </td>
+            </tr>
+          }
+        } @empty {
+          <tr><td class="empty-cell" colspan="6">{{ loading() ? 'Cargando cuentas…' : 'No hay usuarios que coincidan con la búsqueda.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</section>
+
+@if (editorMode()) {
+  <dialog class="overlay" open aria-labelledby="user-editor-title">
+    <section class="user-editor">
+      <header class="editor-heading">
+        <div>
+          <p class="eyebrow">{{ editorMode() === 'password' ? 'ACCESO' : 'GESTIÓN DE CUENTA' }}</p>
+          <h2 id="user-editor-title">{{ editorMode() === 'create' ? 'Nuevo usuario' : editorMode() === 'edit' ? 'Editar usuario' : 'Restablecer contraseña' }}</h2>
+        </div>
+        <button class="close-button" type="button" aria-label="Cerrar" (click)="closeEditor()">×</button>
+      </header>
+
+      @if (editorMode() === 'create') {
+        <form (ngSubmit)="saveUser()" #createForm="ngForm">
+          <label>Correo<input name="email" type="email" [(ngModel)]="email" required maxlength="254" autocomplete="email" /></label>
+          <label>Nombre visible<input name="displayName" [(ngModel)]="displayName" required maxlength="100" autocomplete="name" /></label>
+          <label>Contraseña inicial<input name="password" type="password" [(ngModel)]="password" required minlength="8" maxlength="72" autocomplete="new-password" /></label>
+          <p class="field-note">La cuenta se crea como usuario. Puedes asignarle el rol administrador después.</p>
+          <div class="form-actions"><button class="secondary-button" type="button" (click)="closeEditor()">Cancelar</button><button class="primary-button" type="submit" [disabled]="createForm.invalid || saving()">{{ saving() ? 'Creando…' : 'Crear cuenta' }}</button></div>
+        </form>
+      }
+
+      @if (editorMode() === 'edit') {
+        <form (ngSubmit)="saveUser()" #editForm="ngForm">
+          <label>Correo<input name="email" type="email" [(ngModel)]="email" required maxlength="254" autocomplete="email" /></label>
+          <label>Nombre visible<input name="displayName" [(ngModel)]="displayName" required maxlength="100" autocomplete="name" /></label>
+          <label>Rol<select name="role" [(ngModel)]="role"><option value="USER">Usuario</option><option value="ADMIN">Administrador</option></select></label>
+          <label>Estado<select name="active" [(ngModel)]="active"><option [ngValue]="true">Activa</option><option [ngValue]="false">Inactiva</option></select></label>
+          <div class="form-actions"><button class="secondary-button" type="button" (click)="closeEditor()">Cancelar</button><button class="primary-button" type="submit" [disabled]="editForm.invalid || saving()">{{ saving() ? 'Guardando…' : 'Guardar cambios' }}</button></div>
+        </form>
+      }
+
+      @if (editorMode() === 'password') {
+        <form (ngSubmit)="resetUserPassword()" #passwordForm="ngForm">
+          <p class="field-note">Define una nueva contraseña para <strong>{{ editingUser()?.email }}</strong>. No se muestra ni recupera la anterior.</p>
+          <label>Nueva contraseña<input name="password" type="password" [(ngModel)]="password" required minlength="8" maxlength="72" autocomplete="new-password" /></label>
+          <div class="form-actions"><button class="secondary-button" type="button" (click)="closeEditor()">Cancelar</button><button class="primary-button" type="submit" [disabled]="passwordForm.invalid || saving()">{{ saving() ? 'Guardando…' : 'Restablecer' }}</button></div>
+        </form>
+      }
+    </section>
+  </dialog>
+}

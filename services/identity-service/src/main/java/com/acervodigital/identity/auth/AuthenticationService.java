@@ -47,6 +47,7 @@ public class AuthenticationService {
     public TokenResponse createToken(CreateTokenRequest request) {
         String email = normalizeEmail(request.email());
         CollectorAccount account = accountRepository.findByEmail(email)
+            .filter(CollectorAccount::isActive)
                 .filter(candidate -> passwordEncoder.matches(request.password(), candidate.getPasswordHash()))
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Credenciales inválidas"));
         return jwtTokenService.issue(account);

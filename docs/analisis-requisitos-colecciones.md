@@ -17,7 +17,7 @@ La aplicacion se diseñara de forma generica para admitir nuevos tipos de elemen
 - Gestionar una lista de deseos por coleccion.
 - Ofrecer operaciones CRUD mediante una API REST.
 - Disponer posteriormente de una interfaz web Angular.
-- Servir como proyecto practico de Spring Boot, microservicios, persistencia, seguridad y pruebas.
+- Servir como proyecto práctico para aprender Spring Boot, microservicios, persistencia y bases de datos, seguridad, pruebas, Git/GitHub, gestión de ramas, versionado, releases y prácticas DevOps.
 
 ## 3. Actores
 

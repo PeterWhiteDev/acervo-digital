@@ -2,7 +2,7 @@
 
 ## Estado actual
 
-- Última versión publicada: `v0.6.0`.
+- Última versión publicada: `v0.6.1`.
 - Rama principal: `master`.
 - Stack actual: Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway.
 - Interfaz Angular 22 en desarrollo; PostgreSQL queda para el hito `1.0.0`.
@@ -73,11 +73,20 @@ El frontend integra registro/login JWT, rutas protegidas, catálogo paginado, ed
 
 **Criterio de aceptación:** los flujos principales del MVP se pueden completar desde la interfaz usando la API, con validaciones y errores comprensibles.
 
-### `0.6.1` — Temas de interfaz: en preparación
+### `0.6.1` — Temas de interfaz: publicada
 
 - Selector fijo en todas las pantallas con tres estilos guardados en el navegador: Clásico, Expedición y Neón.
 - Cada tema cambia colores, tipografías, logo, fondo y la ubicación de navegación, filtros y listas.
-- Integrado en `develop` mediante la PR #10. Versión Maven `0.6.1` preparada; pendiente `clean install` en STS, PR de `develop` a `master` y tag `v0.6.1`.
+- Integrado en `develop` mediante la PR #10, fusionado en `master` mediante la PR #11 y publicado como GitHub Release `v0.6.1`. El usuario confirmó `clean install` en STS con `BUILD SUCCESS` en los cuatro módulos. El frontend compila, sus tres pruebas unitarias pasan y el usuario confirmó manualmente que el selector de temas funciona.
+
+### `0.7.0` — Administración de usuarios: en desarrollo
+
+- Añadir navegación y pantalla **Usuarios** solo para `ADMIN`, después de Colecciones, Catálogo y Tipos/Atributos; la aplicación abre por defecto en Colecciones.
+- Permitir administrar otras cuentas, promover/degradar roles, restablecer contraseña y desactivar/reactivar sin borrar sus datos.
+- Mostrar datos de cuenta sin credenciales y cantidades de colecciones, ejemplares por colección y agrupación por ubicación, sin títulos, precios ni notas.
+- Proteger identity-service y collection-service con validación JWT/rol; conservar al menos un administrador activo y bloquear operaciones administrativas sobre la propia cuenta.
+- La interfaz muestra etiquetas en castellano para enums y maneja JWT caducados volviendo al login con un aviso claro; `503` indica servicio no disponible.
+- Build Angular correcto y 9/9 pruebas frontend aprobadas. El usuario confirmó que Usuarios ya carga como admin con el servidor Angular iniciado con el proxy actualizado. Pendientes `clean install` en STS y smoke test de CRUD, restricciones de cuenta y los tres temas.
 
 ### `1.0.0` — MVP completo y estable
 

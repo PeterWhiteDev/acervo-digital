@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { CatalogApi } from '../core/api.service';
 import { uiIcons } from '../core/ui-icons';
-import { AttributeDefinition, CatalogItem, IdentifierScheme, ItemType } from '../core/models';
+import { AttributeDefinition, CatalogItem, IDENTIFIER_SCHEME_LABELS, IdentifierScheme, ItemType } from '../core/models';
 
 @Component({
   selector: 'app-catalog-page',
@@ -162,15 +162,30 @@ export class CatalogPage implements OnInit {
 
   private showError(error: unknown): void {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    this.error.set(status === 409
-      ? 'El identificador ya está asociado a otra ficha.'
-      : status === 404
-        ? 'La ficha, el tipo o uno de sus atributos ya no existe.'
-        : 'No se pudo completar la operación. Revisa los datos y la conexión con el catálogo.');
+    switch (status) {
+      case 401:
+        this.error.set('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+        break;
+      case 404:
+        this.error.set('La ficha, el tipo o uno de sus atributos ya no existe.');
+        break;
+      case 409:
+        this.error.set('El identificador ya está asociado a otra ficha.');
+        break;
+      case 503:
+        this.error.set('El catálogo no está disponible en este momento.');
+        break;
+      default:
+        this.error.set('No se pudo completar la operación. Revisa los datos o la conexión con el catálogo.');
+    }
   }
 
   protected identifierLabel(identifier: CatalogItem['identifiers'][number]): string {
-    return `${identifier.scheme}: ${identifier.value}`;
+    return `${IDENTIFIER_SCHEME_LABELS[identifier.scheme]}: ${identifier.value}`;
+  }
+
+  protected identifierSchemeLabel(scheme: IdentifierScheme): string {
+    return IDENTIFIER_SCHEME_LABELS[scheme];
   }
 
   protected attributeLabel(attribute: CatalogItem['attributes'][number]): string {

@@ -200,6 +200,23 @@ html[data-theme="expedition"]:not(#theme-guard) {
   .no-collection { background: rgba(255, 248, 228, .6); border: 1px dashed #8a6a3a; }
   .no-collection-icon { background: var(--forest); }
 
+  // Users: account rows become pinned ledger cards.
+  app-users-page .users-page .user-toolbar { background: rgba(255, 248, 228, .55); border: 1px dashed #8a6a3a; margin-bottom: 1.2rem; padding: .7rem; }
+  app-users-page .users-table { display: block; min-width: 0; }
+  app-users-page .users-table thead { display: none; }
+  app-users-page .users-table tbody { display: grid; gap: 1.2rem; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  app-users-page .users-table .user-row { background: #f8efd9; border: 1px solid rgba(74, 52, 30, .35); box-shadow: 3px 5px 0 rgba(74, 52, 30, .16); display: grid; grid-template-columns: 1fr 1fr; padding: .75rem; transform: rotate(-.3deg); }
+  app-users-page .users-table .user-row:nth-child(even) { transform: rotate(.35deg); }
+  app-users-page .users-table .user-row > td { border: 0; padding: .35rem; }
+  app-users-page .users-table .user-identity, app-users-page .users-table .row-actions { grid-column: 1 / -1; }
+  app-users-page .users-table .row-actions { justify-content: end; }
+  app-users-page .users-table .details-row { background: #f3e5c5; border: 1px dashed #8a6a3a; display: block; grid-column: 1 / -1; padding: .5rem; }
+  app-users-page .users-table .details-row > td { display: block; }
+  app-users-page .collection-count-card { background: #fbf3e0; border: 1px dashed #8a6a3a; border-radius: 0; box-shadow: 2px 3px 0 rgba(74, 52, 30, .12); }
+  app-users-page .collection-count-card > header { border-bottom-style: dashed; }
+  app-users-page .count-button { border-radius: 999px; font-family: var(--mono-font); }
+  app-users-page .icon-action { border-color: #8a6a3a; border-radius: 50%; }
+
   // Access: journal page on the left, porthole sea on the right.
   .auth-page { grid-template-columns: 1.05fr .95fr; }
   .auth-aside { background: radial-gradient(circle at 68% 30%, #2d6f78, #0e2f37 58%, #071a1f); border-left: 6px double #b8862f; order: 2; }

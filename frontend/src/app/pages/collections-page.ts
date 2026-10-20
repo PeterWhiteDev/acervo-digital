@@ -6,11 +6,13 @@ import { LucideDynamicIcon } from '@lucide/angular';
 import { CollectionApi, CatalogApi } from '../core/api.service';
 import { uiIcons } from '../core/ui-icons';
 import {
+  COPY_CONDITION_LABELS,
   CatalogItem,
   CollectionCopy,
   CollectionResource,
   CopyCondition,
   Location,
+  WISHLIST_PRIORITY_LABELS,
   WishlistEntry,
   WishlistPriority,
 } from '../core/models';
@@ -61,6 +63,14 @@ export class CollectionsPage implements OnInit {
   protected priority: WishlistPriority = 'MEDIUM';
   protected locationName = '';
   protected locationDescription = '';
+
+  protected conditionLabel(condition: CopyCondition): string {
+    return COPY_CONDITION_LABELS[condition];
+  }
+
+  protected priorityLabel(priority: WishlistPriority): string {
+    return WISHLIST_PRIORITY_LABELS[priority];
+  }
 
   ngOnInit(): void {
     this.loadCollections();
@@ -343,12 +353,21 @@ export class CollectionsPage implements OnInit {
 
   private showError(error: unknown): void {
     const status = error instanceof HttpErrorResponse ? error.status : 0;
-    this.error.set(status === 403
-      ? 'No tienes permiso para modificar esta colección.'
-      : status === 404
-        ? 'La colección, ubicación o ficha ya no existe.'
-        : status === 503
-          ? 'El catálogo no está disponible en este momento.'
-          : 'No se pudo completar la operación. Comprueba los datos e inténtalo de nuevo.');
+    switch (status) {
+      case 401:
+        this.error.set('Tu sesión ha caducado. Vuelve a iniciar sesión.');
+        break;
+      case 403:
+        this.error.set('No tienes permiso para modificar esta colección.');
+        break;
+      case 404:
+        this.error.set('La colección, ubicación o ficha ya no existe.');
+        break;
+      case 503:
+        this.error.set('El catálogo no está disponible en este momento.');
+        break;
+      default:
+        this.error.set('No se pudo completar la operación. Revisa los datos e inténtalo de nuevo.');
+    }
   }
 }

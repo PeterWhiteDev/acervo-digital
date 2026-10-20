@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import {
   AttributeDataType,
   AttributeDefinition,
+  AdminCollector,
+  AdminCollectorCollectionsSummary,
   CatalogIdentifier,
   CatalogItem,
   CatalogItemPage,
@@ -16,6 +18,40 @@ import {
   WishlistEntry,
   WishlistPriority,
 } from './models';
+
+@Injectable({ providedIn: 'root' })
+export class AdminApi {
+  private readonly http = inject(HttpClient);
+
+  listUsers(): Observable<AdminCollector[]> {
+    return this.http.get<AdminCollector[]>('/api/v1/admin/users');
+  }
+
+  createUser(request: { email: string; displayName: string; password: string }): Observable<AdminCollector> {
+    return this.http.post<AdminCollector>('/api/v1/admin/users', request);
+  }
+
+  updateUser(id: string, request: {
+    email: string;
+    displayName: string;
+    role: 'USER' | 'ADMIN';
+    active: boolean;
+  }): Observable<AdminCollector> {
+    return this.http.put<AdminCollector>(`/api/v1/admin/users/${id}`, request);
+  }
+
+  deactivateUser(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/admin/users/${id}`);
+  }
+
+  resetPassword(id: string, password: string): Observable<void> {
+    return this.http.put<void>(`/api/v1/admin/users/${id}/password`, { password });
+  }
+
+  getUserCollections(id: string): Observable<AdminCollectorCollectionsSummary> {
+    return this.http.get<AdminCollectorCollectionsSummary>(`/api/v1/admin/collectors/${id}/collections`);
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class CatalogApi {

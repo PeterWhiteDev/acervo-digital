@@ -14,6 +14,9 @@
       <p class="eyebrow">ACERVO DIGITAL / ACCESO</p>
       <h2>{{ mode() === 'login' ? 'Qué bueno verte.' : 'Empieza tu acervo.' }}</h2>
       <p class="form-intro">{{ mode() === 'login' ? 'Entra para continuar donde lo dejaste.' : 'Crea tu cuenta y empieza a organizar tu colección.' }}</p>
+      @if (auth.sessionExpired()) {
+        <p class="form-error" role="alert">Tu sesión ha caducado. Vuelve a iniciar sesión para continuar.</p>
+      }
 
       <form (ngSubmit)="submit()" #form="ngForm">
         @if (mode() === 'register') {
