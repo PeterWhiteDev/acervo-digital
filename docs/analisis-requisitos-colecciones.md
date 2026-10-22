@@ -53,7 +53,7 @@ La aplicacion se diseña de forma generica para admitir nuevos tipos de elemento
 - Cada usuario administra un unico perfil.
 - Un coleccionista puede administrar varias colecciones.
 - Se contemplan los roles `USER` y `ADMIN`.
-- La autenticación JWT con roles `USER` y `ADMIN` está implementada en `identity-service`; la administración de cuentas `0.7.0` está validada e integrada en `develop` mediante la PR #12, pendiente de publicación.
+- La autenticación JWT con roles `USER` y `ADMIN` está implementada en `identity-service`; la administración de cuentas está publicada en `v0.7.0`.
 
 ### 4.2 Colecciones
 
@@ -269,7 +269,7 @@ El usuario busca elementos por titulo, tipo, categoria o identificador y filtra 
 - Perfiles de coleccionista.
 - Roles.
 - Registro, perfiles básicos, roles `USER`/`ADMIN` y emisión/validación JWT HS256 implementados.
-- Administración de cuentas `0.7.0` implementada, validada e integrada en `develop` mediante la PR #12; publicación pendiente.
+- Administración de cuentas publicada en `v0.7.0`.
 
 #### catalog-service
 

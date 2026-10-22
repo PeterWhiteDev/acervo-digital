@@ -14,7 +14,7 @@ La fuente Mermaid editable del diagrama de clases del dominio está en [`docs/mo
 
 La guía breve para instalar requisitos y ejecutar los servicios está en [`docs/instalacion-y-ejecucion.md`](docs/instalacion-y-ejecucion.md).
 
-El backend usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La interfaz usa Angular 22 y Node.js 26. Cada servicio mantiene su propia base H2 local. La última release publicada es `v0.6.1`; la administración de cuentas `0.7.0` está implementada, validada e integrada en `develop` mediante la PR #12, pendiente de publicación. `1.0.0` será la primera versión estable. El estado y los pendientes se detallan en [`docs/hoja-de-ruta.md`](docs/hoja-de-ruta.md).
+El backend usa Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway. La interfaz usa Angular 22 y Node.js 26. Cada servicio mantiene su propia base H2 local. La última release publicada es `v0.7.0`, que incorpora la administración de cuentas. `1.0.0` será la primera versión estable. El estado y los pendientes se detallan en [`docs/hoja-de-ruta.md`](docs/hoja-de-ruta.md).
 
 ## Identidad y autenticación
 
