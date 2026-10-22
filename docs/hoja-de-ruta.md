@@ -2,11 +2,11 @@
 
 ## Estado actual
 
-- Última versión publicada: `v0.6.1`.
+- Última versión publicada: `v0.7.0`.
 - Rama principal: `master`.
 - Stack actual: Java 17, Spring Boot 3.5.6, Maven, H2 y Flyway.
 - Interfaz Angular 22 implementada; PostgreSQL queda para el hito `1.0.0`.
-- La administración de cuentas `0.7.0` está integrada en `develop` mediante la PR #12; el trabajo actual es reconciliar documentación en `feature/documentacion-pendiente`.
+- Siguiente hito: `1.0.0`.
 - El usuario ejecuta Maven y las pruebas desde Eclipse STS. Los cambios de Git se gestionan desde SourceTree/STS.
 
 La versión `0.x` indica que el MVP sigue en desarrollo. `1.0.0` se reservará para la primera versión completa, integrada y estable.
@@ -81,7 +81,7 @@ El frontend integra registro/login JWT, rutas protegidas, catálogo paginado, ed
 - Cada tema cambia colores, tipografías, logo, fondo y la ubicación de navegación, filtros y listas.
 - Integrado en `develop` mediante la PR #10, fusionado en `master` mediante la PR #11 y publicado como GitHub Release `v0.6.1`. El usuario confirmó `clean install` en STS con `BUILD SUCCESS` en los cuatro módulos. El frontend compila, sus tres pruebas unitarias pasan y el usuario confirmó manualmente que el selector de temas funciona.
 
-### `0.7.0` — Administración de usuarios: implementada y validada en `develop`
+### `0.7.0` — Administración de usuarios: publicada
 
 - Añadir navegación y pantalla **Usuarios** solo para `ADMIN`, después de Colecciones, Catálogo y Tipos/Atributos; la aplicación abre por defecto en Colecciones.
 - Permitir administrar otras cuentas, promover/degradar roles, restablecer contraseña y desactivar/reactivar sin borrar sus datos.
@@ -89,7 +89,8 @@ El frontend integra registro/login JWT, rutas protegidas, catálogo paginado, ed
 - Proteger identity-service y collection-service con validación JWT/rol; conservar al menos un administrador activo y bloquear operaciones administrativas sobre la propia cuenta.
 - La interfaz muestra etiquetas en castellano para enums y maneja JWT caducados volviendo al login con un aviso claro; `503` indica servicio no disponible.
 - Build Angular correcto y 9/9 pruebas frontend aprobadas. El usuario confirmó `clean install` en STS y smoke test con cuentas `USER` y `ADMIN`.
-- PR #12 (`feature/admin-users` → `develop`) fusionada. La publicación de `0.7.0` queda pendiente.
+- PR #12 (`feature/admin-users` → `develop`) y PR #13 (documentación) fusionadas en `develop`; PR #14 con la versión Maven `0.7.0` fusionada en `master` (`a816f91`).
+- El usuario confirmó `clean install` en STS con `0.7.0` el 2026-10-21: `BUILD SUCCESS` en los cuatro módulos. Tag `v0.7.0` y GitHub Release publicados.
 
 ### `1.0.0` — MVP completo y estable
 
@@ -118,4 +119,5 @@ Cada día que se trabaje en el proyecto se crea un archivo nuevo en `docs` con e
 - [Seguimiento del 2026-10-14](2026-10-14.md)
 - [Seguimiento del 2026-10-19](2026-10-19.md)
 - [Seguimiento del 2026-10-20](2026-10-20.md)
+- [Seguimiento del 2026-10-21](2026-10-21.md)
 - [Instalación y ejecución](instalacion-y-ejecucion.md)
